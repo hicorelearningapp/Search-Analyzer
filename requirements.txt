@@ -1,56 +1,46 @@
-# ----------------------------
 # Core Dependencies
-# ----------------------------
-fastapi==0.115.0
-uvicorn==0.30.3
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
 python-multipart==0.0.9
-pydantic==1.10.14
+pydantic==1.10.15
 python-dotenv==1.0.1
 
-# ----------------------------
 # Document Processing
-# ----------------------------
 python-docx==1.1.2
 PyMuPDF==1.24.9
 unstructured==0.15.9
 pytesseract==0.3.13
 python-pptx==1.0.2
 
-# ----------------------------
 # Web and API
-# ----------------------------
 requests==2.32.3
 beautifulsoup4==4.12.3
 lxml==5.3.0
 youtube-transcript-api==0.6.2
-ddgs==9.4.1   # ✅ pinned to version compatible with lxml 5.x
 
-# ----------------------------
 # Machine Learning and NLP
-# ----------------------------
 sentence-transformers==2.7.0
-faiss-cpu==1.8.0
+faiss-cpu==1.7.4
+torch==2.2.2
+torchvision==0.17.2
 numpy==1.26.4
 pandas==2.2.2
 
-# ----------------------------
 # LangChain and LLM
-# ----------------------------
-langchain==0.2.12
-langchain-openai==0.1.8
-openai==1.43.0
+langchain==0.2.11
+langchain-openai==0.1.7
+openai==1.40.0
 
-# ----------------------------
-# Development
-# ----------------------------
+# Development (only needed locally, remove for production if slow)
 pytest==8.3.2
 pytest-asyncio==0.23.8
 black==24.4.2
 isort==5.13.2
 flake8==7.1.1
-mypy==1.11.2
+mypy==1.11.1
 
-# ----------------------------
 # Type Hints
-# ----------------------------
 typing-extensions==4.12.2
+
+# Utility
+ddgs==9.4.1
