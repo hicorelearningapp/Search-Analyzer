@@ -34,5 +34,4 @@ openai==1.44.1
 typing-extensions==4.12.2
 
 # Utility
-ddgs==9.5.5
-
+ddgs==9.6.0
