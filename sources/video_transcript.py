@@ -2,15 +2,21 @@
 import re
 from datetime import datetime
 from typing import Optional, Dict, List
-from duckduckgo_search import DDGS
-from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptFound as NoTranscriptAvailable
 from .retriever import VectorRetriever
+
 
 class YouTubeSearcher:
     def __init__(self, max_results: int = 10):
         self.max_results = max_results
 
     def search(self, query: str) -> Dict:
+        # Lazy import to avoid crashing if duckduckgo_search not available
+        try:
+            from duckduckgo_search import DDGS
+        except ImportError as e:
+            return {"query": query, "timestamp": datetime.utcnow().isoformat() + "Z", "results": [],
+                    "error": f"duckduckgo_search not installed: {e}"}
+
         results = []
         with DDGS() as ddgs:
             for r in ddgs.text(f"site:youtube.com {query}", max_results=self.max_results):
@@ -18,7 +24,9 @@ class YouTubeSearcher:
                 if "youtube.com/watch" not in href and "youtu.be/" not in href:
                     continue
                 results.append({"title": r.get("title", ""), "href": href})
+
         return {"query": query, "timestamp": datetime.utcnow().isoformat() + "Z", "results": results}
+
 
 class TranscriptFetcher:
     @staticmethod
@@ -38,13 +46,20 @@ class TranscriptFetcher:
 
     @staticmethod
     def fetch_transcript(video_id: str, languages: Optional[List[str]] = None) -> str:
+        # Lazy import to avoid crashing if youtube-transcript-api not available
+        try:
+            from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+        except ImportError as e:
+            return f"Transcript fetch failed: youtube-transcript-api not installed ({e})"
+
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])
             return " ".join([t.get("text", "") for t in transcript])
-        except (TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable) as e:
+        except (TranscriptsDisabled, NoTranscriptFound) as e:
             return f"Transcript not available: {e}"
         except Exception as e:
             return f"Transcript error: {e}"
+
 
 class YouTubeTranscriptManager:
     def __init__(self, max_results: int = 10, chunk_size: int = 500, retriever: Optional[VectorRetriever] = None):
@@ -56,13 +71,17 @@ class YouTubeTranscriptManager:
     def get_transcripts_from_search(self, query: str) -> str:
         search_out = self.searcher.search(query)
         combined = []
-        for r in search_out["results"]:
+
+        for r in search_out.get("results", []):
             vid = self.fetcher.get_video_id(r["href"])
             if not vid:
                 continue
             text = self.fetcher.fetch_transcript(vid)
             combined.append(f"[{r['title']} - {r['href']}]\n{text}\n")
+
         all_text = "\n".join(combined)
+
         if all_text.strip():
             self.retriever.build_index(all_text, chunk_size=self.chunk_size)
+
         return all_text
