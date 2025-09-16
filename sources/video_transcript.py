@@ -2,8 +2,8 @@
 import re
 from datetime import datetime
 from typing import Optional, Dict, List
-from ddgs import DDGS
-from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
+from duckduckgo_search import DDGS
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, NoTranscriptFound as NoTranscriptAvailable
 from .retriever import VectorRetriever
 
 class YouTubeSearcher:

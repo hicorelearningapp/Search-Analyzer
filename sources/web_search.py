@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Optional
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 
 @dataclass
 class WebSearchConfig:
