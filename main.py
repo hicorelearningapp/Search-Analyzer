@@ -15,30 +15,37 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 def create_app() -> FastAPI:
-    # Ensure config is valid before app starts
+    """Create and configure FastAPI application"""
     Config.verify_config()
 
     app = FastAPI(
         title="Search Analyzer API",
         version="1.0",
-        description="Summarizer and document analysis service"
+        description="Summarizer and document analysis"
     )
 
-    # CORS middleware
+    # Middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # You can restrict this later
+        allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
-        allow_credentials=True
+        allow_credentials=True,
     )
 
-    # Register API router
+    # Simple root route
+    @app.get("/")
+    async def root():
+        return {
+            "message": "Welcome to Search Analyzer API",
+            "health": "/summarize/health",
+            "docs": "/docs"
+        }
+
+    # Include summarizer routes
     app.include_router(api_router, prefix="/summarize")
 
-    # Static reports directory
-    if not os.path.exists(Config.REPORTS_DIR):
-        os.makedirs(Config.REPORTS_DIR)
+    # Serve reports directory
     app.mount("/reports", StaticFiles(directory=Config.REPORTS_DIR), name="reports")
 
     return app
