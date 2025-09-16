@@ -24,16 +24,26 @@ def create_app() -> FastAPI:
         description="Summarizer and document analysis service"
     )
 
+    # ✅ Root route for debugging
+    @app.get("/")
+    async def root():
+        return {
+            "message": "App is running on Azure 🚀",
+            "status": "ok",
+            "docs": "/docs",
+            "health": "/summarize/health"
+        }
+
     # CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # You can restrict this later
+        allow_origins=["*"],  # Restrict later if needed
         allow_methods=["*"],
         allow_headers=["*"],
         allow_credentials=True
     )
 
-    # Register API router
+    # Register API router under /summarize
     app.include_router(api_router, prefix="/summarize")
 
     # Static reports directory
