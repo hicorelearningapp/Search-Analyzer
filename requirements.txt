@@ -21,9 +21,10 @@ sentence-transformers==2.2.2
 numpy==2.2.6
 
 # Configuration
-python-dotenv==0.9.9
+python-dotenv==1.1.1
 
 # Production server
 gunicorn==21.2.0
 
 scikit-learn~=1.7.2
+
