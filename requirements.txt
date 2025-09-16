@@ -1,23 +1,29 @@
 # Core framework
-fastapi>=0.110.0
-uvicorn>=0.27.0
-python-multipart>=0.0.9
+fastapi==0.116.1
+uvicorn==0.35.0
+python-multipart==0.0.9
 
 # PDF & Document processing
-PyPDF2>=3.0.1
-python-docx>=0.8.11
+PyPDF2==3.0.1
+python-docx==0.8.11
 
 # Search & Data retrieval
-duckduckgo-search>=6.1.0
-youtube-transcript-api>=0.6.2
+duckduckgo-search==8.1.1
+youtube-transcript-api==0.6.2
+
+# OpenAI client (LLM Summarizer)
+openai==0.28.0
+
+# Embedding models
+sentence-transformers==2.2.2
 
 # Utilities
-numpy>=1.26.0
-openai>=1.30.0
+numpy==2.2.6
 
 # Configuration
-python-dotenv>=1.0.1
+python-dotenv==0.9.9
 
 # Production server
-gunicorn>=21.2.0
+gunicorn==21.2.0
 
+scikit-learn~=1.7.2
