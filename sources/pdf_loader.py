@@ -31,11 +31,6 @@ class PDFSummarizer:
         self.reports_dir = reports_dir or REPORTS_DIR
 
     async def summarize_pdf(self, file: UploadFile, doc_type: str, pages: int, download: bool = False) -> dict:
-        """
-        Save uploaded PDF, extract text, and return a pipeline summary response.
-        The actual summarization is delegated to SummarizerPipeline in summarizer.common
-        (imported lazily to avoid circular imports).
-        """
         file_bytes = await file.read()
         filename = file.filename or "uploaded.pdf"
         output_path = os.path.join(self.reports_dir, filename)

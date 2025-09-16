@@ -11,11 +11,6 @@ except Exception:
     _HAS_OPENAI = False
 
 class LLMSummarizer:
-    """
-    Simple summarizer wrapper. If OpenAI configured, use chat completions.
-    Otherwise return a length-limited excerpt as fallback.
-    """
-
     def __init__(self, model: str = "gpt-3.5-turbo"):
         self.model = model
 
@@ -45,5 +40,5 @@ class LLMSummarizer:
         return (
             f"Generate a {pages}-page {heading} from the following content.\n\n"
             f"Content:\n{text}\n\n"
-            "Provide a clear, structured summary without markdown, with headings when appropriate."
+            "Provide a clear, structured report without markdown, with headings when appropriate."
         )
