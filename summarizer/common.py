@@ -1,36 +1,31 @@
 # summarizer/common.py
 import os
+from typing import Dict, Any, Optional
 from fastapi.responses import FileResponse
-from .llm_summarizer import LLMSummarizer
-from .docx_generator import DocxGenerator
-
+from config import Config
 
 class SummarizerPipeline:
-    """Pipeline to summarize text and optionally generate/download a docx report."""
-
-    def __init__(self, reports_dir: str | None = None, model_name: str = "gpt-4"):
-        self.reports_dir = reports_dir or os.path.join(os.getcwd(), "reports")
-        self.summarizer = LLMSummarizer(model_name=model_name)
+    def __init__(self, reports_dir: Optional[str] = None, llm=None, generator=None):
+        self.reports_dir = reports_dir or Config.REPORTS_DIR
         os.makedirs(self.reports_dir, exist_ok=True)
 
-    def run(
-        self,
-        text: str,
-        doc_type: str,
-        pages: int,
-        label: str,
-        outfile_name: str,
-        download: bool = False,
-    ):
-        # Step 1: Summarize
+        if llm:
+            self.summarizer = llm
+        else:
+            from .llm_summarizer import LLMSummarizer
+            self.summarizer = LLMSummarizer()
+
+        if generator:
+            self.generator = generator
+        else:
+            from .docx_generator import DocxGenerator
+            self.generator = DocxGenerator()
+
+    def run(self, text: str, doc_type: str, pages: int, label: str, outfile_name: str, download: bool = False) -> Dict[str, Any]:
         summary = self.summarizer.summarize(text, doc_type=doc_type, pages=pages)
-
-        # Step 2: Generate Docx
-        outfile = os.path.join(self.reports_dir, f"{outfile_name}_{doc_type}.docx")
-        path = DocxGenerator().generate_docx(label, doc_type, summary["content"], outfile)
-
-        # Step 3: Handle return type
+        safe_name = "".join(c if c.isalnum() else "_" for c in outfile_name)[:200]
+        outfile = os.path.join(self.reports_dir, f"{safe_name}_{doc_type}.docx")
+        path = self.generator.generate_docx(content={"content": summary["content"]}, output_path=outfile, doc_type=doc_type, title=label)
         if download:
             return FileResponse(path, filename=os.path.basename(path))
-
         return {"summary": summary["content"], "docx": path, "cached": summary.get("cached", False)}

@@ -1,56 +1,29 @@
-import uvicorn
+# main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import uvicorn
 
-require('dotenv').config();
-
-from dotenv import load_dotenv
-import os
-
-# Load variables from .env into environment
-load_dotenv()
-
-# Access the API key
-api_key = os.getenv("API_KEY")
-
-print(api_key)  # just to confirm it works
-
-# Import config first to ensure environment variables are loaded
+from api import router as api_router
 from config import Config
 
-from api import app as api_app
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def create_app() -> FastAPI:
-    """Create and configure the FastAPI application."""
-    # Verify configuration is loaded
     Config.verify_config()
-    
-    app = FastAPI(
-        title="Summarizer API",
-        version="1.0",
-        description="API for summarizing various types of content including web pages, PDFs, and YouTube videos"
-    )
-    
-    # Add CORS middleware
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    # Include API routes
-    app.include_router(api_app, prefix="/summarize")
-    
+    app = FastAPI(title="Search Analyzer API", version="1.0", description="Summarizer and document analysis")
+    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
+    app.include_router(api_router, prefix="/summarize")
+    # serve reports
+    app.mount("/reports", StaticFiles(directory=Config.REPORTS_DIR), name="reports")
     return app
 
+app = create_app()
+
 if __name__ == "__main__":
-    # Create and run the application
-    app = create_app()
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

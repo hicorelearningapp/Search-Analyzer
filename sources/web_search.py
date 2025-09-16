@@ -1,46 +1,40 @@
 # sources/web_search.py
+from dataclasses import dataclass
 from datetime import datetime
+from typing import Dict, Optional
 from ddgs import DDGS
 
+@dataclass
+class WebSearchConfig:
+    max_results: int = 10
+    max_snippet_length: int = 600
 
-class WebSearcher:
-    """Handles performing a web search via DuckDuckGo."""
-
-    def __init__(self, max_results: int = 10):
+class WebSearchManager:
+    def __init__(self, max_results: int = 10, max_snippet_length: int = 600):
         self.max_results = max_results
+        self.max_snippet_length = max_snippet_length
 
-    def search(self, query: str) -> dict:
+    def run(self, query: str) -> str:
+        # perform DDG search and assemble a prompt-friendly string
         results = []
         with DDGS() as ddgs:
             for i, r in enumerate(ddgs.text(query, max_results=self.max_results)):
+                if i >= self.max_results:
+                    break
                 results.append({
                     "rank": i + 1,
-                    "title": r.get("title") or "",
-                    "href": r.get("href") or "",
-                    "body": r.get("body") or ""
+                    "title": r.get("title", ""),
+                    "href": r.get("href", ""),
+                    "body": r.get("body", "")
                 })
-        return {
-            "query": query,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "results": results
-        }
-
-
-class SearchResultFormatter:
-    """Formats search output for use with an LLM."""
-
-    def __init__(self, max_snippet_length: int = 600):
-        self.max_snippet_length = max_snippet_length
-
-    def assemble_for_llm(self, search_output: dict) -> str:
         lines = [
-            f"Search query: {search_output['query']}",
-            f"Fetched at (UTC): {search_output['timestamp']}",
+            f"Search query: {query}",
+            f"Fetched at (UTC): {datetime.utcnow().isoformat()}",
             "",
             "Top search results:",
             ""
         ]
-        for r in search_output["results"]:
+        for r in results:
             snippet = (r["body"] or "").strip()
             if len(snippet) > self.max_snippet_length:
                 snippet = snippet[:self.max_snippet_length] + "..."
@@ -48,15 +42,3 @@ class SearchResultFormatter:
             lines.append(f"Snippet: {snippet}")
             lines.append("")
         return "\n".join(lines)
-
-
-class WebSearchManager:
-    """Coordinates searching and formatting."""
-
-    def __init__(self, max_results: int = 10, max_snippet_length: int = 600):
-        self.searcher = WebSearcher(max_results=max_results)
-        self.formatter = SearchResultFormatter(max_snippet_length=max_snippet_length)
-
-    def run(self, query: str) -> str:
-        search_output = self.searcher.search(query)
-        return self.formatter.assemble_for_llm(search_output)
