@@ -18,4 +18,5 @@ numpy>=1.26.0
 python-dotenv>=1.0.1
 
 # Production server
-gunicorn>=21.2.0
+gunicorn
+
