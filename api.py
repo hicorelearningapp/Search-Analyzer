@@ -17,6 +17,12 @@ web_search_manager = WebSearchManager(max_results=10, max_snippet_length=600)
 summarizer_pipeline = SummarizerPipeline()
 
 
+@router.get("/")
+async def root():
+    """Root route for quick check"""
+    return {"message": "Search Analyzer API is running", "docs": "/docs"}
+
+
 @router.get("/health")
 async def health_check():
     """Simple health check"""
