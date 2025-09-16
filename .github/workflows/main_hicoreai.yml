@@ -68,6 +68,5 @@ jobs:
         with:
           app-name: 'HicoreAI'
           slot-name: 'Production'
-          package: ./python-app 
-
           
+
