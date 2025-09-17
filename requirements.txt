@@ -14,17 +14,12 @@ youtube-transcript-api==0.6.2
 # OpenAI client (LLM Summarizer)
 openai==0.28.0
 
-# Embedding models
-sentence-transformers==2.2.2
-
 # Utilities
 numpy==2.2.6
+scikit-learn==1.7.2
 
 # Configuration
 python-dotenv==1.1.1
 
 # Production server
 gunicorn==21.2.0
-
-scikit-learn~=1.7.2
-
