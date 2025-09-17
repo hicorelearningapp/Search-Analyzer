@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from typing import Optional
 
-from sources.pdf_loader import PDFSummarizer
+from sources.pdf_loader import PDFSummarizer, PDFManager
 from sources.video_transcript import YouTubeTranscriptManager
 from sources.web_search import WebSearchManager
 from summarizer.common import SummarizerPipeline
@@ -13,6 +13,7 @@ from summarizer.common import SummarizerPipeline
 router = APIRouter()
 
 pdf_summarizer = PDFSummarizer()
+pdf_manager = PDFManager()
 youtube_manager = YouTubeTranscriptManager(max_results=10)
 web_search_manager = WebSearchManager(max_results=10, max_snippet_length=600)
 summarizer_pipeline = SummarizerPipeline()
@@ -32,7 +33,8 @@ def summarize_web(topic: str, doc_type: str = "Executive Summary", pages: int = 
 @router.post("/pdf")
 async def summarize_pdf_route(file: UploadFile, doc_type: str = Form(...), pages: int = Form(2), download: bool = Form(False)):
     try:
-        return await pdf_summarizer.summarize_pdf(file, doc_type, pages, download)
+        text = pdf_manager.get_text_from_pdf(file)
+        return summarizer_pipeline.run(text=text, doc_type=doc_type, pages=pages, label="PDF", outfile_name="pdf", download=download)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any, Optional
 from fastapi.responses import FileResponse
 from config import Config
+from .llm_summarizer import LLMSummarizer
 
 class SummarizerPipeline:
     def __init__(self, reports_dir: Optional[str] = None, llm=None, generator=None):
@@ -12,7 +13,6 @@ class SummarizerPipeline:
         if llm:
             self.summarizer = llm
         else:
-            from .llm_summarizer import LLMSummarizer
             self.summarizer = LLMSummarizer()
 
         if generator:

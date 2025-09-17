@@ -14,11 +14,7 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class VectorRetriever:
-    """
-    VectorRetriever: tries to use sentence-transformers for embeddings if available;
-    otherwise uses TF-IDF + NearestNeighbors as a fallback.
-    """
-
+    
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         self.model_name = model_name
         if _HAS_SENT_TRANS:
@@ -55,7 +51,7 @@ class VectorRetriever:
             self.nn = NearestNeighbors(n_neighbors=min(10, X.shape[0]), metric="cosine")
             self.nn.fit(X)
 
-    def get_top_chunks(self, query: str, top_k: int = 3) -> List[str]:
+    def get_top_chunks(self, query: str, top_k: int = 5) -> List[str]:
         if not self.chunks or self.nn is None:
             return []
 

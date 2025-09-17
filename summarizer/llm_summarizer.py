@@ -40,5 +40,5 @@ class LLMSummarizer:
         return (
             f"Generate a {pages}-page {heading} from the following content.\n\n"
             f"Content:\n{text}\n\n"
-            "Provide a clear, structured report without markdown, with headings when appropriate."
+            "Provide a clear, structured summary without markdown, with headings when appropriate."
         )
