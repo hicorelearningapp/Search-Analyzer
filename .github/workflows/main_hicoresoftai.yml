@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - searchanalyzer
+name: Build and deploy Python app to Azure Web App - hicoresoftai
 
 on:
   push:
@@ -58,14 +58,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B03313399B284583B2EFAB4A2F1C3C1F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4445657F4FA34850979EBFA4A971F8DE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B4E2E1E9175E4223B460BA95019F2FDF }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C1172E2310AD404DBFFAFD5C6F2ADE5F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DBCE65B5B9E74B2CB0EC5DA631B0EDF7 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7B61E19417E64F548BE187188F5CB664 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'searchanalyzer'
+          app-name: 'hicoresoftai'
           slot-name: 'Production'
           

@@ -10,6 +10,7 @@ try:
 except Exception:
     _HAS_OPENAI = False
 
+
 class LLMSummarizer:
     def __init__(self, model: str = "gpt-3.5-turbo"):
         self.model = model
@@ -30,8 +31,12 @@ class LLMSummarizer:
                 out = resp.choices[0].message["content"].strip()
                 return {"content": out, "cached": False}
             except Exception as e:
-                return {"content": f"(LLM error: {e})\n\n" + (text[:4000] if text else ""), "cached": False}
-        # fallback
+                return {
+                    "content": f"(LLM error: {e})\n\n" + (text[:4000] if text else ""),
+                    "cached": False
+                }
+
+        # fallback if OpenAI not available
         excerpt = (text or "")[:4000]
         return {"content": excerpt, "cached": False}
 
