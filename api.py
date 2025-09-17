@@ -1,7 +1,11 @@
 # api.py
+import os
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, UploadFile, Form, HTTPException
 from datetime import datetime
 import traceback
+from config import Config
+
 
 router = APIRouter()
 
@@ -18,7 +22,7 @@ try:
     summarizer_pipeline = SummarizerPipeline()
 
 except Exception as e:
-    print("❌ Import error in api.py:", str(e))
+    print("Import error in api.py:", str(e))
     print(traceback.format_exc())
 
     # Dummy fallbacks so app still runs
@@ -92,3 +96,20 @@ def summarize_text(content: str = Form(...), doc_type: str = Form("Executive Sum
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/download/{filename}")
+async def download_file(filename: str):
+    """
+    Serve a generated .docx file with the correct MIME type
+    so Word doesn't mark it as corrupted on Azure.
+    """
+    file_path = os.path.join(Config.REPORTS_DIR, filename)
+
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
