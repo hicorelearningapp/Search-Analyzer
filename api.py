@@ -1,4 +1,6 @@
 # api.py
+import os
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, UploadFile, Form
 from fastapi.responses import JSONResponse
 
@@ -7,6 +9,8 @@ from sources.video_transcript import YouTubeTranscriptFetcher as TranscriptFetch
 from sources.web_search import WebSearchManager
 from sources.retriever import VectorRetriever
 from summarizer.llm_summarizer import LLMSummarizer
+from config import Config
+
 
 router = APIRouter()
 retriever = VectorRetriever()
@@ -58,3 +62,20 @@ async def summarize_text(text: str = Form(...), doc_type: str = Form(...), pages
         return {"raw_text": text, "summary": summary}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@router.get("/download/{filename}")
+async def download_file(filename: str):
+    """
+    Serve a generated .docx file with the correct MIME type
+    so Word doesn't mark it as corrupted on Azure.
+    """
+    file_path = os.path.join(Config.REPORTS_DIR, filename)
+
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
