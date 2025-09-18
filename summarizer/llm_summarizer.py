@@ -77,9 +77,7 @@ class LLMSummarizer:
 
         # 2. Use retriever to get relevant chunks (pdf first, then video)
         query = f"{doc_type}. Relevant sections: {'; '.join(headings)}"
-        chunks = self.retriever.get_top_chunks(query, "pdf", top_k=3)
-        if not chunks:
-            chunks = self.retriever.get_top_chunks(query, "video", top_k=3)
+        chunks = self.retriever.get_top_chunks(query, top_k=3)
 
         # 3. If no chunks, fallback to raw text
         if chunks:
