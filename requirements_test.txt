@@ -1,0 +1,17 @@
+# Core dependencies
+duckduckgo-search>=3.9.0
+youtube-transcript-api>=0.6.1
+numpy>=1.24.3
+pydantic>=1.10.7
+
+# For text processing and embeddings
+langchain>=0.0.200
+sentence-transformers>=2.2.2
+faiss-cpu>=1.7.4
+
+# For async functionality
+anyio>=3.6.2
+
+# For testing
+pytest>=7.3.1
+pytest-asyncio>=0.21.0

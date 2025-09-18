@@ -14,13 +14,16 @@ class DocumentProcessor:
         self.generator = DocxGenerator()
 
     def process_document(self, text: str, source_type: str, doc_type: Optional[str] = None, chunk_size: int = 500) -> Dict:
-        self.retriever.build_index(text, chunk_size=chunk_size)
         headings = []
         if doc_type:
             dt = document_system.get_document_type(doc_type)
             if dt:
                 headings = dt.structure
-        summary = self.summarizer.summarize(text, doc_type=doc_type, pages=2)
+            if pages is None:
+                # assume ~2000 characters per page -> tune as needed
+                pages = max(1, len(text) // 2000)
+        self.retriever.build_index(text, chunk_size=chunk_size)
+        summary = self.summarizer.summarize_with_structure(text, doc_type=doc_type, pages=pages)
         num_chunks = max(1, (len(text) // chunk_size) + (1 if len(text) % chunk_size else 0))
         return {"source_type": source_type, "doc_type": doc_type, "structure": headings, "summary": summary, "num_chunks": num_chunks}
 

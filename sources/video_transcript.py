@@ -1,87 +1,98 @@
 # sources/video_transcript.py
 import re
 from datetime import datetime
-from typing import Optional, Dict, List
-from .retriever import VectorRetriever
+from ddgs import DDGS
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
-class YouTubeSearcher:
+class YouTubeSearch:
+    """Handles searching for YouTube videos using DuckDuckGo."""
+
     def __init__(self, max_results: int = 10):
         self.max_results = max_results
 
-    def search(self, query: str) -> Dict:
-        # Lazy import to avoid crashing if duckduckgo_search not available
-        try:
-            from duckduckgo_search import DDGS
-        except ImportError as e:
-            return {"query": query, "timestamp": datetime.utcnow().isoformat() + "Z", "results": [],
-                    "error": f"duckduckgo_search not installed: {e}"}
-
+    def search(self, query: str) -> list[dict]:
         results = []
         with DDGS() as ddgs:
-            for r in ddgs.text(f"site:youtube.com {query}", max_results=self.max_results):
+            for i, r in enumerate(ddgs.text(f"site:youtube.com {query}", max_results=self.max_results)):
                 href = r.get("href") or ""
-                if "youtube.com/watch" not in href and "youtu.be/" not in href:
+                if "youtube.com/watch" not in href:
                     continue
-                results.append({"title": r.get("title", ""), "href": href})
+                results.append({
+                    "rank": i + 1,
+                    "title": r.get("title") or "",
+                    "href": href
+                })
+        return results
 
-        return {"query": query, "timestamp": datetime.utcnow().isoformat() + "Z", "results": results}
 
+# class YouTubeTranscriptFetcher:
+#     """Handles extracting transcript text from a single YouTube video."""
 
-class TranscriptFetcher:
+#     @staticmethod
+#     def extract_video_id(url: str) -> str | None:
+#         regex = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
+#         match = re.search(regex, url)
+#         return match.group(1) if match else None
+
+#     def fetch_transcript(self, url: str) -> str:
+#         video_id = self.extract_video_id(url)
+#         if not video_id:
+#             return ""
+#         try:
+#             transcript = YouTubeTranscriptApi.get_transcript(video_id)
+#             return " ".join([snippet["text"] for snippet in transcript])
+#         except Exception:
+#             return ""
+
+class YouTubeTranscriptFetcher:
+    """Handles extracting transcript text from a single YouTube video."""
+
     @staticmethod
-    def get_video_id(url: str) -> Optional[str]:
-        from urllib.parse import urlparse, parse_qs
+    def extract_video_id(url: str) -> str | None:
+        regex = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
+        match = re.search(regex, url)
+        return match.group(1) if match else None
+
+    def fetch_transcript(self, url: str) -> str:
+        video_id = self.extract_video_id(url)
+        if not video_id:
+            return ""
         try:
-            parsed = urlparse(url)
-            qs = parse_qs(parsed.query)
-            if "v" in qs:
-                return qs["v"][0]
-            if parsed.netloc and parsed.netloc.endswith("youtu.be"):
-                return parsed.path.lstrip("/")
-            m = re.search(r"([0-9A-Za-z_-]{11})", url)
-            return m.group(1) if m else None
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            transcript = None
+            if "en" in [t.language_code for t in transcript_list]:
+                transcript = transcript_list.find_transcript(["en"])
+                self.last_lang_used = "en"
+            else:
+                transcript = next(iter(transcript_list), None)
+                self.last_lang_used = getattr(transcript, "language_code", "unknown")
+            if not transcript:
+                return ""
+            fetched = transcript.fetch()
+            return " ".join([snippet["text"] for snippet in fetched if snippet["text"].strip()])
         except Exception:
-            return None
-
-    @staticmethod
-    def fetch_transcript(video_id: str, languages: Optional[List[str]] = None) -> str:
-        # Lazy import to avoid crashing if youtube-transcript-api not available
-        try:
-            from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
-        except ImportError as e:
-            return f"Transcript fetch failed: youtube-transcript-api not installed ({e})"
-
-        try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=languages or ["en"])
-            return " ".join([t.get("text", "") for t in transcript])
-        except (TranscriptsDisabled, NoTranscriptFound) as e:
-            return f"Transcript not available: {e}"
-        except Exception as e:
-            return f"Transcript error: {e}"
-
+            self.last_lang_used = "unknown"
+            return ""
+            
 
 class YouTubeTranscriptManager:
-    def __init__(self, max_results: int = 10, chunk_size: int = 500, retriever: Optional[VectorRetriever] = None):
-        self.searcher = YouTubeSearcher(max_results=max_results)
-        self.fetcher = TranscriptFetcher()
-        self.chunk_size = chunk_size
-        self.retriever = retriever or VectorRetriever()
+    """Coordinates search and transcript fetching, outputs plain text only."""
+
+    def __init__(self, max_results: int = 5):
+        self.searcher = YouTubeSearch(max_results=max_results)
+        self.fetcher = YouTubeTranscriptFetcher()
 
     def get_transcripts_from_search(self, query: str) -> str:
-        search_out = self.searcher.search(query)
-        combined = []
+        results = self.searcher.search(query)
+        transcripts = []
 
-        for r in search_out.get("results", []):
-            vid = self.fetcher.get_video_id(r["href"])
-            if not vid:
-                continue
-            text = self.fetcher.fetch_transcript(vid)
-            combined.append(f"[{r['title']} - {r['href']}]\n{text}\n")
+        for r in results:
+            text = self.fetcher.fetch_transcript(r["href"])
+            if text:
+                transcripts.append(text)
 
-        all_text = "\n".join(combined)
+        # Pure transcript text only, joined with spacing
+        return "\n\n".join(transcripts)
 
-        if all_text.strip():
-            self.retriever.build_index(all_text, chunk_size=self.chunk_size)
 
-        return all_text
