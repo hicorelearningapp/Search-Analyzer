@@ -1,71 +1,88 @@
-# summarizer/docx_generator.py
 from docx import Document
-from docx.shared import Pt, RGBColor, Inches
+from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from datetime import datetime
-from document_system import document_system  # import your existing document system
 
 
-class DocxGenerator:
-    @staticmethod
-    def create_docx(
-        topic: str,
-        doc_type: str,
-        summary_result: dict,
-        output_path: str = None,
-        author: str = None
-    ) -> str:
+class DocxFormatter:
+    """
+    Formatter for creating neatly styled, professional DOCX documents.
+    """
+
+    def __init__(self, filename: str = "output.docx"):
+        self.filename = filename
+        self.document = Document()
+        self._set_base_styles()
+
+    def _set_base_styles(self):
+        """Configure global and heading styles."""
+        # Normal style
+        normal = self.document.styles["Normal"]
+        normal.font.name = "Calibri"
+        normal.font.size = Pt(12)
+        normal.paragraph_format.line_spacing = 1.5
+        normal.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Heading styles
+        self._set_heading_style("Heading 1", size=16, bold=True)
+        self._set_heading_style("Heading 2", size=14, bold=True)
+        self._set_heading_style("Heading 3", size=12, bold=True)
+
+    def _set_heading_style(self, style_name: str, size: int, bold: bool = True):
+        """Helper to define heading style properties."""
+        style = self.document.styles[style_name]
+        style.font.name = "Calibri"
+        style.font.size = Pt(size)
+        style.font.bold = bold
+
+    def add_title(self, title: str):
+        """Add main title as Heading 1."""
+        self.document.add_heading(title, level=1)
+
+    def add_metadata(self, metadata: dict):
+        """Add metadata section with Heading 2."""
+        if metadata:
+            self.document.add_heading("Metadata", level=2)
+            for key, value in metadata.items():
+                self.document.add_paragraph(f"{key}: {value}", style="Normal")
+
+    def add_sections(self, headings: list, content: str):
         """
-        Generate a DOCX file from summarization result.
-        summary_result: dict from LLMSummarizer.summarize_with_structure()
+        Add sections based on provided headings.
+        If headings are given, split content into sections.
         """
-        doc = Document()
+        if not headings:
+            self.document.add_paragraph(content, style="Normal")
+            return
 
-        # Set margins
-        section = doc.sections[0]
-        section.top_margin = section.bottom_margin = section.left_margin = section.right_margin = Inches(0.9)
+        self.document.add_heading("Content", level=2)
 
-        # --- Cover Page ---
-        cover = doc.add_paragraph()
-        cover.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run = cover.add_run(f"{doc_type} on {topic}")
-        run.font.name = "Calibri"
-        run.font.size = Pt(26)
-        run.bold = True
-        run.font.color.rgb = RGBColor(0, 51, 153)
+        paragraphs = [p.strip() for p in content.split("\n") if p.strip()]
+        for i, heading in enumerate(headings):
+            self.document.add_heading(heading, level=3)
+            if i < len(paragraphs):
+                self.document.add_paragraph(paragraphs[i], style="Normal")
 
-        doc.add_paragraph("")
-        meta = doc.add_paragraph()
-        meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        authored = author or "Automated Report"
-        meta.add_run(f"Author: {authored}").italic = True
-        meta.add_run(f"    •    Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}").italic = True
-        doc.add_page_break()
-
-        # --- Content ---
-        headings = summary_result.get("headings", [])
-        content_text = summary_result.get("content", "")
-
-        # Try splitting into sections using headings
-        for heading in headings:
-            if heading.lower() in content_text.lower():
-                doc.add_heading(heading, level=1)
-                # naive split: get text after heading
-                parts = content_text.split(heading, 1)
-                if len(parts) > 1:
-                    para = doc.add_paragraph(parts[1].strip())
-                    para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            else:
-                # fallback: just dump content in order
-                doc.add_heading(heading, level=1)
-                doc.add_paragraph(content_text.strip())
-
-        if not output_path:
-            safe_topic = "".join(c if c.isalnum() or c in " _-" else "_" for c in topic)[:120]
-            output_path = f"{safe_topic}_{doc_type.replace(' ', '_')}.docx"
-
-        doc.save(output_path)
-        return output_path
+    def save(self):
+        """Save the document to the given filename."""
+        self.document.save(self.filename)
+        print(f"✅ DOCX saved as {self.filename}")
 
 
-__all__ = ['DocxGenerator']
+class SummaryDocxBuilder:
+    """
+    Builds a DOCX document from a summarizer output dictionary.
+    """
+
+    def __init__(self, summary: dict, filename: str = "output.docx"):
+        self.summary = summary
+        self.formatter = DocxFormatter(filename)
+
+    def build(self):
+        """Build the DOCX document from the summary structure."""
+        self.formatter.add_title(self.summary.get("document_type", "Summary Document"))
+        self.formatter.add_metadata(self.summary.get("metadata", {}))
+        self.formatter.add_sections(
+            self.summary.get("headings", []),
+            self.summary.get("content", "")
+        )
+        self.formatter.save()

@@ -85,11 +85,10 @@ class LLMSummarizer:
         else:
             chunk_text = text if len(text) < 12000 else text[:12000]
 
-        # 4. Build pseudo-prompt (not GPT-style, but structured guidance)
         structured_input = (
             f"Write a '{doc_type}' document with the following sections:\n"
             + "\n".join(f"- {h}" for h in headings)
-            + f"\n\nBase material:\n{chunk_text}"
+            + f"\n\n Base you content on this material. Add to it if needed:\n{chunk_text}"
         )
 
         # 5. Run HuggingFace summarizer

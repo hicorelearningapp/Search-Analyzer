@@ -4,14 +4,14 @@ from pathlib import Path
 import json
 from sources.retriever import VectorRetriever
 from .llm_summarizer import LLMSummarizer
-from .docx_generator import DocxGenerator
+from .docx_generator import SummaryDocxBuilder
 from document_system import document_system
 
 class DocumentProcessor:
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         self.retriever = VectorRetriever(model_name=model_name)
         self.summarizer = LLMSummarizer()
-        self.generator = DocxGenerator()
+        self.generator = SummaryDocxBuilder()
 
     def process_document(self, text: str, source_type: str, doc_type: Optional[str] = None, chunk_size: int = 500) -> Dict:
         headings = []
