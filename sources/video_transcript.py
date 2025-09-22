@@ -26,54 +26,47 @@ class YouTubeSearch:
         return results
 
 
-# class YouTubeTranscriptFetcher:
-#     """Handles extracting transcript text from a single YouTube video."""
-
-#     @staticmethod
-#     def extract_video_id(url: str) -> str | None:
-#         regex = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
-#         match = re.search(regex, url)
-#         return match.group(1) if match else None
-
-#     def fetch_transcript(self, url: str) -> str:
-#         video_id = self.extract_video_id(url)
-#         if not video_id:
-#             return ""
-#         try:
-#             transcript = YouTubeTranscriptApi.get_transcript(video_id)
-#             return " ".join([snippet["text"] for snippet in transcript])
-#         except Exception:
-#             return ""
-
 class YouTubeTranscriptFetcher:
-    """Handles extracting transcript text from a single YouTube video."""
 
-    @staticmethod
-    def extract_video_id(url: str) -> str | None:
+    def get_video_id(url):
+        """
+        Extracts the video ID from a YouTube URL.
+        """
         regex = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
         match = re.search(regex, url)
-        return match.group(1) if match else None
+        if match:
+            return match.group(1)
+        else:
+            raise ValueError("Invalid YouTube URL")
 
-    def fetch_transcript(self, url: str) -> str:
-        video_id = self.extract_video_id(url)
-        if not video_id:
-            return ""
+    def get_transcript_direct(url):
+
+        video_id = get_video_id(url)
         try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            transcript = None
-            if "en" in [t.language_code for t in transcript_list]:
-                transcript = transcript_list.find_transcript(["en"])
-                self.last_lang_used = "en"
-            else:
-                transcript = next(iter(transcript_list), None)
-                self.last_lang_used = getattr(transcript, "language_code", "unknown")
-            if not transcript:
-                return ""
-            fetched = transcript.fetch()
-            return " ".join([snippet["text"] for snippet in fetched if snippet["text"].strip()])
-        except Exception:
-            self.last_lang_used = "unknown"
-            return ""
+            transcript_api = YouTubeTranscriptApi()
+            result = transcript_api.fetch(video_id)
+            
+            # Let's inspect the object structure
+            print(f"Object type: {type(result)}")
+            print(f"Object attributes: {[attr for attr in dir(result) if not attr.startswith('_')]}")
+            
+            # Try to access the transcript data
+            if hasattr(result, '_transcript_data'):
+                transcript_data = result._transcript_data
+                if isinstance(transcript_data, list):
+                    return " ".join([entry.get('text', '') for entry in transcript_data])
+            
+            # If that doesn't work, try to convert to string and parse
+            result_str = str(result)
+            if 'FetchedTranscriptSnippet(text=' in result_str:
+                # Extract text parts using regex
+                text_matches = re.findall(r"text='(.*?)'", result_str)
+                return " ".join(text_matches)
+            
+            return result_str
+                
+        except Exception as e:
+            return f"Error: {e}"
             
 
 class YouTubeTranscriptManager:
@@ -88,11 +81,9 @@ class YouTubeTranscriptManager:
         transcripts = []
 
         for r in results:
-            text = self.fetcher.fetch_transcript(r["href"])
+            text = self.fetcher.get_transcript_direct(r["href"])
             if text:
                 transcripts.append(text)
 
         # Pure transcript text only, joined with spacing
         return "\n\n".join(transcripts)
-
-

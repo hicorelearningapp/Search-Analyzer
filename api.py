@@ -9,13 +9,20 @@ from sources.video_transcript import YouTubeTranscriptFetcher as TranscriptFetch
 from sources.web_search import WebSearchManager
 from sources.retriever import VectorRetriever
 from summarizer.llm_summarizer import LLMSummarizer
-from summarizer.docx_generator import SummaryDocxBuilder  # ⬅ use your formatter
+from summarizer.docx_generator import SummaryDocxBuilder
+from enum import Enum
+from document_system import document_system
+
 from config import Config
 
 
 router = APIRouter()
 retriever = VectorRetriever()
 summarizer = LLMSummarizer()
+DocumentTypeEnum = Enum(
+    "DocumentTypeEnum",
+    {t.replace(" ", "_"): t for t in document_system.list_document_types()}
+)
 
 
 def save_docx(summary: dict, prefix: str, doc_type: str) -> str:
@@ -31,49 +38,52 @@ def save_docx(summary: dict, prefix: str, doc_type: str) -> str:
 
 
 @router.post("/pdf")
-async def summarize_pdf(file: UploadFile, doc_type: str = Form(...), pages: int = Form(2)):
+async def summarize_pdf(file: UploadFile, doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
     try:
         text = await PDFManager().extract_text(file=file)
         retriever.process_text(
             text,
-            metadata={"source":"pdf","query": file.filename, "doc_type": doc_type}
+            metadata={"source":"pdf","query": file.filename, "doc_type": doc_type.value}
         )
-        summary = summarizer.summarize_with_structure(text, doc_type, pages)
+        summary = summarizer.summarize_with_structure(retriever, text, doc_type.value, pages)
 
-        filename = save_docx(summary, "pdf", doc_type)
+        filename = save_docx(summary, "pdf", doc_type.value)
         return {"raw_text": text, "summary": summary, "download_link": f"/download/{filename}"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @router.post("/youtube")
-async def summarize_youtube(url: str = Form(...), doc_type: str = Form(...), pages: int = Form(2)):
+async def summarize_youtube(url: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
     try:
         text = TranscriptFetcher().fetch(url)
         retriever.process_text(
             text,
-            metadata={"source":"video","query": url, "doc_type": doc_type}
+            metadata={"source":"video","query": url, "doc_type": doc_type.value}
         )
-        summary = summarizer.summarize_with_structure(text, doc_type, pages)
+        summary = summarizer.summarize_with_structure(retriever, text, doc_type.value, pages)
 
-        filename = save_docx(summary, "youtube", doc_type)
+        filename = save_docx(summary, "youtube", doc_type.value)
         return {"raw_text": text, "summary": summary, "download_link": f"/download/{filename}"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @router.post("/web")
-async def summarize_web(query: str = Form(...), doc_type: str = Form(...), pages: int = Form(2)):
+async def summarize_web(
+    query: str = Form(...), 
+    doc_type: DocumentTypeEnum = Form(...), 
+    pages: int = Form(2)):
     try:
         search_manager = WebSearchManager()
         text = search_manager.run(query)
         retriever.process_text(
             text,
-            metadata={"source": "web", "query": query, "doc_type": doc_type}
+            metadata={"source": "web", "query": query, "doc_type": doc_type.value}
         )
-        summary = summarizer.summarize_with_structure(text, doc_type, pages)
+        summary = summarizer.summarize_with_structure(retriever, query, doc_type.value, pages)
 
-        filename = save_docx(summary, "web", doc_type)
+        filename = save_docx(summary, "web", doc_type.value)
         return {
             "query": query,
             "raw_text": text[:1000] + "..." if len(text) > 1000 else text,
@@ -85,15 +95,15 @@ async def summarize_web(query: str = Form(...), doc_type: str = Form(...), pages
 
 
 @router.post("/text")
-async def summarize_text(text: str = Form(...), doc_type: str = Form(...), pages: int = Form(2)):
+async def summarize_text(text: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
     try:
         retriever.process_text(     
             text,
-            metadata={"source":"text","query": text, "doc_type": doc_type}
+            metadata={"source":"text","query": text, "doc_type": doc_type.value}
         )
-        summary = summarizer.summarize_with_structure(text, doc_type, pages)
+        summary = summarizer.summarize_with_structure(retriever, text, doc_type.value, pages)
 
-        filename = save_docx(summary, "text", doc_type)
+        filename = save_docx(summary, "text", doc_type.value)
         return {"raw_text": text, "summary": summary, "download_link": f"/download/{filename}"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

@@ -1,4 +1,12 @@
 # sources/retriever.py
+# Fix faiss import issue on Windows
+import sys
+try:
+    import faiss  # normal import
+except ImportError:
+    raise ImportError(
+        "Faiss is not installed. Please install with `pip install faiss-cpu` or `pip install faiss-gpu`."
+    )
 from typing import List, Optional, Dict, Any
 from enum import Enum
 from pydantic import BaseModel
@@ -110,13 +118,21 @@ class VectorRetriever:
             )
         return chunks
 
-    def get_top_chunks(self, query: str, top_k: int = 3):
-        """Return the raw chunk strings (compatibility wrapper)."""
+    def get_top_chunks_for_model(self, query: str, max_tokens: int = 2000):
+
         if self.vectorstore is None:
             return []
-        # similarity_search_with_score returns list[(Document, score)]
-        results = self.vectorstore.similarity_search_with_score(query, k=top_k)
-        return [doc.page_content if hasattr(doc, "page_content") else str(doc) for doc, _ in results]
+
+        top_chunks = self.vectorstore.similarity_search(query, k=20)  # retrieve more than needed
+        selected_chunks = []
+        total_chars = 0
+        for doc in top_chunks:
+            text = doc.page_content if hasattr(doc, "page_content") else str(doc)
+            if total_chars + len(text) > max_tokens * 4:  # rough char->token estimate
+                break
+            selected_chunks.append(text)
+            total_chars += len(text)
+        return selected_chunks
 
     def get_relevant_documents(self, query: str, k: int = 3):
         """Return Document objects (langchain style)."""

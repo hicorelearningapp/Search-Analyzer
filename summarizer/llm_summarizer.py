@@ -1,112 +1,99 @@
 # summarizer/llm_summarizer.py
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import torch
+from typing import Dict, Any, List
+from openai import OpenAI
+import os
+import math
 
 from document_system import document_system
 from sources.retriever import VectorRetriever
 
 
-class SummaryResult(BaseModel):
-    """Result of text summarization."""
-    summary: str
-    metadata: dict = {}
-
-
 class LLMSummarizer:
-    """
-    Summarizer that:
-      1. Retrieves relevant chunks using VectorRetriever
-      2. Builds a structured prompt based on DocumentSystem
-      3. Summarizes text using a HuggingFace model
-    """
-
-    def __init__(
-        self,
-        model_name: str = "facebook/bart-large-cnn",
-        max_length: int = 200,
-        min_length: int = 50
-    ):
+    def __init__(self, model_name="gpt-4o-mini"):
+        # Use OpenAI client (needs OPENAI_API_KEY in environment or passed directly)
+        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model_name = model_name
-        self.max_length = max_length
-        self.min_length = min_length
-        self.tokenizer = None
-        self.model = None
-        self._initialized = False
-        self.retriever = VectorRetriever()
 
-    def _initialize_model(self):
-        """Lazy initialization of the model."""
-        if not self._initialized:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name)
-            self._initialized = True
+    def summarize_with_structure(
+        self, retriever: VectorRetriever, query: str, doc_type: str, pages: int = 2
+    ) -> Dict[str, Any]:
+        """
+        Retrieve chunks from retriever, build prompts, and call GPT-4o-mini.
+        Optimized for producing long outputs (multi-page, multi-thousand word).
+        """
 
-    def _hf_summarize(self, text: str) -> str:
-        """Summarize text with HuggingFace seq2seq model."""
-        self._initialize_model()
-        inputs = self.tokenizer(
-            text,
-            max_length=1024,
-            return_tensors="pt",
-            truncation=True
-        )
-        with torch.no_grad():
-            summary_ids = self.model.generate(
-                inputs["input_ids"],
-                max_length=self.max_length,
-                min_length=self.min_length,
-                length_penalty=2.0,
-                num_beams=4,
-                early_stopping=True
+        # Get the document type template
+        dt = document_system.get_document_type(doc_type)
+        headings = dt.structure if dt else []
+
+        # Collect top chunks from retriever
+        chunks = retriever.get_top_chunks_for_model(query, max_tokens=6000)
+
+        # Word target (approx 500 words per page)
+        target_words_total = pages * 500
+
+        # Decide iterations
+        pages_per_call = 8  # safe upper bound for one call (~4k words)
+        iterations = math.ceil(pages / pages_per_call)
+        words_per_iter = pages_per_call * 500
+
+        all_outputs: List[str] = []
+        for i in range(iterations):
+            # Distribute chunks across iterations
+            chunk_text = "\n\n".join(chunks[i::iterations]) if chunks else ""
+
+            continuation_note = (
+                f"This is Part {i+1} of {iterations}. Continue writing where the last part stopped. "
+                "Do NOT repeat introductions or conclusions until the final part.\n\n"
+                if i > 0 else ""
             )
-        return self.tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
-    def summarize_with_structure(self, text: str, doc_type: str, pages: int = 1) -> Dict[str, Any]:
-        """
-        Summarize input text according to document type structure.
-        Retrieval → Chunks → Prompt → Summarizer
-        """
+            # Build prompt
+            prompt = (
+                f"Write a '{doc_type}' document with the following sections:\n"
+                + "\n".join(f"- {h}" for h in headings)
+                + "\n\n"
+                f"{continuation_note}"
+                f"Base your content on this material. Expand thoroughly with multiple paragraphs, "
+                f"examples, analysis, and detailed explanations.\n"
+                f"Write AT LEAST {words_per_iter} words (around {pages_per_call} pages). "
+                f"Do not stop early. Do not summarize; fully elaborate.\n\n"
+                f"Material:\n{chunk_text}\n\n"
+                f"Ensure this part is cohesive and continues smoothly into the next one."
+            )
 
-        # 1. Get template (headings) from document system
-        doc_type_obj = document_system.get_document_type(doc_type)
-        if not doc_type_obj:
-            raise ValueError(f"Unknown document type '{doc_type}'")
-        headings = doc_type_obj.structure
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": "You are a helpful writing assistant that produces detailed, structured, long-form documents."},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=16000,  # enough for ~5k words
+            )
 
-        # 2. Use retriever to get relevant chunks (pdf first, then video)
-        query = f"{doc_type}. Relevant sections: {'; '.join(headings)}"
-        chunks = self.retriever.get_top_chunks(query, top_k=3)
+            part_text = response.choices[0].message.content.strip()
+            all_outputs.append(part_text)
 
-        # 3. If no chunks, fallback to raw text
-        if chunks:
-            chunk_text = "\n\n".join(chunks)
-        else:
-            chunk_text = text if len(text) < 12000 else text[:12000]
-
-        structured_input = (
-            f"Write a '{doc_type}' document with the following sections:\n"
-            + "\n".join(f"- {h}" for h in headings)
-            + f"\n\n Base you content on this material. Add to it if needed:\n{chunk_text}"
-        )
-
-        # 5. Run HuggingFace summarizer
-        summary_text = self._hf_summarize(structured_input)
+        combined_text = "\n\n".join(all_outputs)
 
         return {
             "document_type": doc_type,
             "headings": headings,
-            "content": summary_text,
+            "content": combined_text,
             "model": self.model_name,
             "metadata": {
-                "max_length": self.max_length,
-                "min_length": self.min_length,
-            }
+                "pages_requested": pages,
+                "iterations": iterations,
+                "pages_per_call": pages_per_call,
+                "target_words": target_words_total,
+                "max_tokens_per_call": 16000,
+            },
         }
 
 
 # For backward compatibility
-def summarize_with_structure(text: str, doc_type: str, pages: int = 1, **kwargs) -> Dict[str, Any]:
+def summarize_with_structure(
+    retriever: VectorRetriever, query: str, doc_type: str, pages: int = 1, **kwargs
+) -> Dict[str, Any]:
     summarizer = LLMSummarizer()
-    return summarizer.summarize_with_structure(text, doc_type, pages)
+    return summarizer.summarize_with_structure(retriever, query, doc_type, pages)
