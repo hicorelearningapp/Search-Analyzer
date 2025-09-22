@@ -29,3 +29,4 @@ httpx>=0.23.0
 # Optional (used in some files)
 python-multipart>=0.0.5  # For file uploads
 aiofiles>=0.8.0  # For async file handling
+duckduckgo-search>=3.8.0
