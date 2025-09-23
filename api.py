@@ -1,15 +1,21 @@
-# api.py
-from fastapi import APIRouter, UploadFile, Form
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, UploadFile, Form, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
 from enum import Enum
+import os
+
 from document_system import document_system
-from APIManager import PDFClass, YouTubeClass, WebClass, TextClass, api_manager
+from services.pdf_service import PDFClass
+from services.youtube_service import YouTubeClass
+from services.web_service import WebClass
+from services.text_service import TextClass
+
+# Initialize services
+pdf_service = PDFClass()
+youtube_service = YouTubeClass()
+web_service = WebClass()
+text_service = TextClass()
 
 router = APIRouter()
-pdf_manager = PDFClass()
-youtube_manager = YouTubeClass()
-web_manager = WebClass()
-text_manager = TextClass()
 
 # Create DocumentTypeEnum for API documentation
 DocumentTypeEnum = Enum(
@@ -19,21 +25,40 @@ DocumentTypeEnum = Enum(
 
 @router.post("/pdf")
 async def summarize_pdf(file: UploadFile, doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
-    return await pdf_manager.process(file, doc_type.value, pages)
+    try:
+        return await pdf_service.process_pdf(file, doc_type, pages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/youtube")
 async def summarize_youtube(url: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
-    return await youtube_manager.process(url, doc_type.value, pages)
+    try:
+        return await youtube_service.process_youtube(url, doc_type, pages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/web")
 async def summarize_web(query: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
-    return await web_manager.process(query, doc_type.value, pages)
+    try:
+        return await web_service.process_web(query, doc_type, pages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/text")
 async def summarize_text(text: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
-    return await text_manager.process(text, doc_type.value, pages)
+    try:
+        return await text_service.process_text(text, doc_type, pages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/download/{filename}")
 async def download_file(filename: str):
-    """Serve generated DOCX files with the correct MIME type."""
-    return await api_manager.download_file(filename)
+    file_path = os.path.join("reports", filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
