@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 import requests
-from ..utils.search_utils import (
+from utils.search_utils import (
     semantic_scholar_search,
     arxiv_search,
     openalex_search,
