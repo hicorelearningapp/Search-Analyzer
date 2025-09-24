@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..app_state import AppState
+from app_state import AppState
 
 router = APIRouter()
 
