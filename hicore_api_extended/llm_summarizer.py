@@ -1,4 +1,4 @@
-# summarizer/llm_summarizer.py
+# llm_summarizer.py
 from typing import Dict, Any, List
 from openai import OpenAI
 import os
