@@ -46,3 +46,4 @@ config.json
 .faiss_index
 *.faiss
 .cache/
+hicore_api_extended/hicore_api_extended6.py
