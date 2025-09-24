@@ -1,7 +1,7 @@
 #services/pdf_service.py
 from fastapi import UploadFile
 from fastapi.responses import JSONResponse
-from .base_manager import BaseAPIManager
+from base_manager import BaseAPIManager
 from sources.pdf_loader import PDFManager
 from services.types import DocumentTypeEnum
 from fastapi import UploadFile, Form
