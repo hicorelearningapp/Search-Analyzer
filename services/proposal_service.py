@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional
 from openai import AzureOpenAI
 import asyncio
-from ..app_state import AppState
+from app_state import AppState
 
 class ProposalService:
     @staticmethod
