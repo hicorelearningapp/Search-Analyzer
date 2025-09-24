@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
 from datetime import datetime
-from ..app_state import AppState
+from app_state import AppState
 
 class SessionService:
 
