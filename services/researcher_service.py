@@ -1,7 +1,7 @@
 #researcher_service.py
 from typing import List, Dict, Any
-from ..utils.azure_client import call_azure_chat
-from ..app_state import AppState
+from utils.azure_client import call_azure_chat
+from app_state import AppState
 from fastapi import HTTPException, Depends
 class ResearcherService:
     @staticmethod
