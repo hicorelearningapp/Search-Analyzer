@@ -1,47 +1,46 @@
 # Core Dependencies
-fastapi>=0.68.0
-uvicorn>=0.15.0
-python-dotenv>=0.19.0
-pydantic>=1.8.0
+fastapi
+uvicorn
+python-dotenv
+pydantic
 
 # Database
-sqlalchemy>=1.4.0
-alembic>=1.7.0
+sqlalchemy
+alembic
 
 # Async
-httpx>=0.23.0
-aiofiles>=0.8.0
+httpx
+aiofiles
 
 # Document Processing
-PyPDF2>=2.0.0
-python-docx>=0.8.11
-beautifulsoup4>=4.10.0
-requests>=2.26.0
-python-multipart>=0.0.5
+PyPDF2
+python-docx
+beautifulsoup4
+requests
+python-multipart
 
 # Search and Web
-ddg-search>=3.8.0
-youtube-transcript-api>=0.6.1
-duckduckgo-search>=3.8.0
+youtube-transcript-api
+duckduckgo-search
 
 # AI/ML (for Search-Analyzer)
-sentence-transformers>=2.2.2
-openai>=0.27.0
-langchain-community>=0.0.10
-faiss-cpu>=1.7.3  # or faiss-gpu if using GPU
-numpy>=1.21.0
+sentence-transformers
+openai
+langchain-community
+faiss-cpu  # or faiss-gpu if using GPU
+numpy
 
 # Development and Testing
-pytest>=7.0.0
-pytest-asyncio>=0.18.0
+pytest
+pytest-asyncio
 
 # Utilities
-python-jose[cryptography]>=3.3.0  # For JWT tokens
-passlib[bcrypt]>=1.7.4  # For password hashing
-python-multipart>=0.0.5  # For file uploads
+python-jose[cryptography]  # For JWT tokens
+passlib[bcrypt]  # For password hashing
+python-multipart  # For file uploads
 
 # CORS
-python-multipart>=0.0.5
+python-multipart
 
 # Environment
-python-dotenv>=0.19.0
+python-dotenv
