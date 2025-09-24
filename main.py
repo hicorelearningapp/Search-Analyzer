@@ -12,7 +12,9 @@ from api import router as api_router
 # Load environment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 def create_app() -> FastAPI:
     # Ensure config is valid before app starts
