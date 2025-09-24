@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from openai import AzureOpenAI
-from ..utils.azure_client import call_azure_chat
+from utils.azure_client import call_azure_chat
 
 class ReviewService:
     @staticmethod
