@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 from fastapi import Depends
-from ..app_state import AppState
-from ..utils.parsing import parse_structured_sections
-from ..utils.azure_client import call_azure_chat
+from app_state import AppState
+from utils.parsing import parse_structured_sections
+from utils.azure_client import call_azure_chat
 
 class SummaryService:
     @staticmethod
