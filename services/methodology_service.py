@@ -10,9 +10,9 @@ except ImportError:
     Digraph = None
     GRAPHVIZ_AVAILABLE = False
 
-from ..utils.azure_client import call_azure_chat
-from ..utils.pdf_utils import download_pdf_to_text
-from ..app_state import AppState
+from utils.azure_client import call_azure_chat
+from utils.pdf_utils import download_pdf_to_text
+from app_state import AppState
 
 class MethodologyService:
     @classmethod
