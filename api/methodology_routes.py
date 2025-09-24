@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, HTTPException, Request
 from typing import List
-from ..services.methodology_service import MethodologyService
-from ..app_state import AppState
+from services.methodology_service import MethodologyService
+from app_state import AppState
 
 router = APIRouter()
 
