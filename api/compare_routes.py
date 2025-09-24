@@ -1,7 +1,7 @@
 # In compare_routes.py
 from fastapi import APIRouter, HTTPException, Request
-from ..services.researcher_service import ResearcherService
-from ..app_state import AppState
+from services.researcher_service import ResearcherService
+from app_state import AppState
 
 router = APIRouter()
 
