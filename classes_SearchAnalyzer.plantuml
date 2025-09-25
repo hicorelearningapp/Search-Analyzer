@@ -1,0 +1,254 @@
+@startuml classes_SearchAnalyzer
+set namespaceSeparator none
+
+'===================
+' Classes
+'===================
+class "AppState" as SearchAnalyzer_app_state_AppState {
+  search_results
+  selected_indices
+  sessions
+  state
+  synthesis_storage
+  clear()
+  get_app_state() -> AppState
+}
+
+class "BaseAPIManager" as SearchAnalyzer_services_base_manager_BaseAPIManager {
+  document_types
+  retriever
+  summarizer
+  save_docx(summary, prefix, doc_type) -> str
+}
+
+class "Config" as SearchAnalyzer_config_Config {
+  AZURE_CFG
+  OPENAI_API_KEY
+  REPORTS_DIR
+  SEMANTIC_SCHOLAR_AUTHOR_URL
+  SEMANTIC_SCHOLAR_URL
+  SERPAPI_KEY
+  verify_config()
+}
+
+class "DocumentSystem" as SearchAnalyzer_document_system_DocumentSystem {
+  add_document_type(key, name, structure, description)
+  get_document_type(key)
+  list_document_types()
+}
+
+class "DocumentType" as SearchAnalyzer_document_system_DocumentType {
+  description
+  name
+  structure
+}
+
+class "LLMSummarizer" as SearchAnalyzer_llm_summarizer_LLMSummarizer {
+  client
+  model_name
+  summarize_with_structure(retriever, query, doc_type, pages)
+}
+
+class "MethodologyService" as SearchAnalyzer_services_methodology_service_MethodologyService {
+  compare_selected_methodologies(app_state, selected_indices)
+  extract_methodology_snippets(app_state, indices)
+}
+
+class "PDFClass" as SearchAnalyzer_services_pdf_service_PDFClass {
+  process_pdf(file, doc_type, pages)
+}
+
+class "PDFExtractionResult" as SearchAnalyzer_sources_pdf_loader_PDFExtractionResult {
+  metadata
+  text
+}
+
+class "PDFExtractor" as SearchAnalyzer_sources_pdf_loader_PDFExtractor {
+  extract_text_from_pdf_bytes(pdf_bytes)
+  extract_text_with_langchain(file_path)
+}
+
+class "PDFManager" as SearchAnalyzer_sources_pdf_loader_PDFManager {
+  use_langchain
+  extract_text(file_path, file)
+}
+
+class "Paper" as SearchAnalyzer_services_models_Paper {
+  abstract
+  authors
+  doi
+  paperId
+  pdf_url
+  source
+  title
+  url
+  year
+}
+
+class "ProposalService" as SearchAnalyzer_services_proposal_service_ProposalService {
+  proposal_writer(title, chosen_subtopics, expected_methods)
+}
+
+class "Researcher" as SearchAnalyzer_services_models_Researcher {
+  affiliations
+  citationCount
+  hIndex
+  homepage
+  name
+  paperCount
+  url
+}
+
+class "ResearcherService" as SearchAnalyzer_services_researcher_service_ResearcherService {
+  compare_selected_papers_endpoint(app_state)
+}
+
+class "RetrievalMethod" as SearchAnalyzer_sources_retriever_RetrievalMethod {
+  name
+}
+
+class "ReviewService" as SearchAnalyzer_services_review_service_ReviewService {
+  scaffold_review(papers, subtopics, azure_client)
+}
+
+class "SearchError" as SearchAnalyzer_services_models_SearchError {
+  details
+  error
+}
+
+class "SearchRequest" as SearchAnalyzer_services_models_SearchRequest {
+  limit
+  query
+  sources
+}
+
+class "SearchResponse" as SearchAnalyzer_services_models_SearchResponse {
+  papers
+  query
+  total_results
+}
+
+class "SearchResult" as SearchAnalyzer_sources_retriever_SearchResult {
+  metadata
+  score
+  text
+}
+
+class "SearchService" as SearchAnalyzer_services_search_service_SearchService {
+  find_top_researchers(query, limit)
+  search_multiple_sources(query, sources, limit)
+  select_papers(indices, search_results, session)
+}
+
+class "SelectPapersRequest" as SearchAnalyzer_services_models_SelectPapersRequest {
+  paper_ids
+  session_id
+}
+
+class "SelectPapersResponse" as SearchAnalyzer_services_models_SelectPapersResponse {
+  selected_count
+  selected_papers
+  session_id
+}
+
+class "SessionService" as SearchAnalyzer_services_session_service_SessionService {
+  create_session(app_state, intent, user_id)
+  delete_session(app_state, session_id)
+  get_session(app_state, session_id)
+  suggest_topics(keywords, limit, session_id)
+  update_session(app_state, session_id, updates)
+}
+
+class "SessionState" as SearchAnalyzer_app_state_SessionState {
+  search_results
+  selected_indices
+  sessions
+  synthesis_storage
+}
+
+class "SummaryDocxBuilder" as SearchAnalyzer_docx_generator_SummaryDocxBuilder {
+  doc
+  filepath
+  summary
+  build()
+}
+
+class "SummaryService" as SearchAnalyzer_services_summary_service_SummaryService {
+  generate_overall_synthesis(app_state, selected_idx)
+  generate_structured_summaries(app_state, selected_idx)
+}
+
+class "TextClass" as SearchAnalyzer_services_text_service_TextClass {
+  process_text(text, doc_type, pages)
+}
+
+class "VectorRetriever" as SearchAnalyzer_sources_retriever_VectorRetriever {
+  chunk_overlap
+  chunk_size
+  embeddings
+  model_name
+  retrieval_method
+  text_splitter
+  vectorstore
+  build_index(text, metadata, chunk_size)
+  get_relevant_documents(query, k)
+  get_top_chunks_for_model(query, max_tokens)
+  process_text(text, metadata)
+  search(query, k)
+}
+
+class "VisualizationService" as SearchAnalyzer_services_visualization_service_VisualizationService {
+  create_visual_map(papers, max_related)
+  generate_methodology_flowchart(methods_text, format)
+}
+
+class "WebClass" as SearchAnalyzer_services_web_service_WebClass {
+  process(query, doc_type, pages)
+}
+
+class "WebSearchConfig" as SearchAnalyzer_sources_web_search_WebSearchConfig {
+  max_results
+  max_snippet_length
+}
+
+class "WebSearchManager" as SearchAnalyzer_sources_web_search_WebSearchManager {
+  max_results
+  max_snippet_length
+  extract_page_content(url)
+  run(query)
+}
+
+class "YouTubeClass" as SearchAnalyzer_services_youtube_service_YouTubeClass {
+  process_youtube(query, doc_type, pages)
+}
+
+class "YouTubeSearch" as SearchAnalyzer_sources_video_transcript_YouTubeSearch {
+  max_results
+  search(query)
+}
+
+class "YouTubeTranscriptFetcher" as SearchAnalyzer_sources_video_transcript_YouTubeTranscriptFetcher {
+  get_transcript_direct(url)
+  get_video_id(url)
+}
+
+class "YouTubeTranscriptManager" as SearchAnalyzer_sources_video_transcript_YouTubeTranscriptManager {
+  fetcher
+  searcher
+  get_transcripts_from_search(query)
+}
+
+'===================
+' Relationships
+'===================
+SearchAnalyzer_services_pdf_service_PDFClass --|> SearchAnalyzer_services_base_manager_BaseAPIManager
+SearchAnalyzer_services_text_service_TextClass --|> SearchAnalyzer_services_base_manager_BaseAPIManager
+SearchAnalyzer_services_web_service_WebClass --|> SearchAnalyzer_services_base_manager_BaseAPIManager
+SearchAnalyzer_services_youtube_service_YouTubeClass --|> SearchAnalyzer_services_base_manager_BaseAPIManager
+
+SearchAnalyzer_app_state_SessionState --* SearchAnalyzer_app_state_AppState : state
+SearchAnalyzer_sources_video_transcript_YouTubeSearch --* SearchAnalyzer_sources_video_transcript_YouTubeTranscriptManager : searcher
+SearchAnalyzer_sources_video_transcript_YouTubeTranscriptFetcher --* SearchAnalyzer_sources_video_transcript_YouTubeTranscriptManager : fetcher
+SearchAnalyzer_sources_retriever_RetrievalMethod --o SearchAnalyzer_sources_retriever_VectorRetriever : retrieval_method
+
+@enduml

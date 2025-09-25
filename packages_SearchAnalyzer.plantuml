@@ -1,0 +1,125 @@
+@startuml packages_SearchAnalyzer
+set namespaceSeparator none
+package "Search-Analyzer" as Search-Analyzer {
+}
+package "Search-Analyzer.api" as Search-Analyzer.api {
+}
+package "Search-Analyzer.api.compare_routes" as Search-Analyzer.api.compare_routes {
+}
+package "Search-Analyzer.api.methodology_routes" as Search-Analyzer.api.methodology_routes {
+}
+package "Search-Analyzer.api.misc_routes" as Search-Analyzer.api.misc_routes {
+}
+package "Search-Analyzer.api.proposal_routes" as Search-Analyzer.api.proposal_routes {
+}
+package "Search-Analyzer.api.review_routes" as Search-Analyzer.api.review_routes {
+}
+package "Search-Analyzer.api.routers" as Search-Analyzer.api.routers {
+}
+package "Search-Analyzer.api.search_analyzer_routes" as Search-Analyzer.api.search_analyzer_routes {
+}
+package "Search-Analyzer.api.search_routes" as Search-Analyzer.api.search_routes {
+}
+package "Search-Analyzer.api.session_routes" as Search-Analyzer.api.session_routes {
+}
+package "Search-Analyzer.api.synthesis_routes" as Search-Analyzer.api.synthesis_routes {
+}
+package "Search-Analyzer.api.visualization_routes" as Search-Analyzer.api.visualization_routes {
+}
+package "Search-Analyzer.app_state" as Search-Analyzer.app_state {
+}
+package "Search-Analyzer.config" as Search-Analyzer.config {
+}
+package "Search-Analyzer.document_system" as Search-Analyzer.document_system {
+}
+package "Search-Analyzer.docx_generator" as Search-Analyzer.docx_generator {
+}
+package "Search-Analyzer.hicore_api_extended6" as Search-Analyzer.hicore_api_extended6 {
+}
+package "Search-Analyzer.llm_summarizer" as Search-Analyzer.llm_summarizer {
+}
+package "Search-Analyzer.main" as Search-Analyzer.main {
+}
+package "Search-Analyzer.reports" as Search-Analyzer.reports {
+}
+package "Search-Analyzer.services" as Search-Analyzer.services {
+}
+package "Search-Analyzer.services.base_manager" as Search-Analyzer.services.base_manager {
+}
+package "Search-Analyzer.services.methodology_service" as Search-Analyzer.services.methodology_service {
+}
+package "Search-Analyzer.services.models" as Search-Analyzer.services.models {
+}
+package "Search-Analyzer.services.pdf_service" as Search-Analyzer.services.pdf_service {
+}
+package "Search-Analyzer.services.proposal_service" as Search-Analyzer.services.proposal_service {
+}
+package "Search-Analyzer.services.researcher_service" as Search-Analyzer.services.researcher_service {
+}
+package "Search-Analyzer.services.review_service" as Search-Analyzer.services.review_service {
+}
+package "Search-Analyzer.services.search_service" as Search-Analyzer.services.search_service {
+}
+package "Search-Analyzer.services.session_service" as Search-Analyzer.services.session_service {
+}
+package "Search-Analyzer.services.summary_service" as Search-Analyzer.services.summary_service {
+}
+package "Search-Analyzer.services.text_service" as Search-Analyzer.services.text_service {
+}
+package "Search-Analyzer.services.types" as Search-Analyzer.services.types {
+}
+package "Search-Analyzer.services.visualization_service" as Search-Analyzer.services.visualization_service {
+}
+package "Search-Analyzer.services.web_service" as Search-Analyzer.services.web_service {
+}
+package "Search-Analyzer.services.youtube_service" as Search-Analyzer.services.youtube_service {
+}
+package "Search-Analyzer.setup_search_analyzer" as Search-Analyzer.setup_search_analyzer {
+}
+package "Search-Analyzer.sources" as Search-Analyzer.sources {
+}
+package "Search-Analyzer.sources.pdf_loader" as Search-Analyzer.sources.pdf_loader {
+}
+package "Search-Analyzer.sources.retriever" as Search-Analyzer.sources.retriever {
+}
+package "Search-Analyzer.sources.video_transcript" as Search-Analyzer.sources.video_transcript {
+}
+package "Search-Analyzer.sources.web_search" as Search-Analyzer.sources.web_search {
+}
+package "Search-Analyzer.state" as Search-Analyzer.state {
+}
+package "Search-Analyzer.utils" as Search-Analyzer.utils {
+}
+package "Search-Analyzer.utils.azure_client" as Search-Analyzer.utils.azure_client {
+}
+package "Search-Analyzer.utils.http_utils" as Search-Analyzer.utils.http_utils {
+}
+package "Search-Analyzer.utils.parsing" as Search-Analyzer.utils.parsing {
+}
+package "Search-Analyzer.utils.pdf_utils" as Search-Analyzer.utils.pdf_utils {
+}
+package "Search-Analyzer.utils.search_utils" as Search-Analyzer.utils.search_utils {
+}
+Search-Analyzer.llm_summarizer --> Search-Analyzer.document_system
+Search-Analyzer.llm_summarizer --> Search-Analyzer.sources.retriever
+Search-Analyzer.main --> Search-Analyzer.api
+Search-Analyzer.main --> Search-Analyzer.api.compare_routes
+Search-Analyzer.main --> Search-Analyzer.api.methodology_routes
+Search-Analyzer.main --> Search-Analyzer.api.misc_routes
+Search-Analyzer.main --> Search-Analyzer.api.proposal_routes
+Search-Analyzer.main --> Search-Analyzer.api.review_routes
+Search-Analyzer.main --> Search-Analyzer.api.search_analyzer_routes
+Search-Analyzer.main --> Search-Analyzer.api.search_routes
+Search-Analyzer.main --> Search-Analyzer.api.session_routes
+Search-Analyzer.main --> Search-Analyzer.api.synthesis_routes
+Search-Analyzer.main --> Search-Analyzer.api.visualization_routes
+Search-Analyzer.services.pdf_service --> Search-Analyzer.services.base_manager
+Search-Analyzer.services.text_service --> Search-Analyzer.services.base_manager
+Search-Analyzer.services.web_service --> Search-Analyzer.services.base_manager
+Search-Analyzer.services.youtube_service --> Search-Analyzer.services.base_manager
+Search-Analyzer.sources --> Search-Analyzer.sources.pdf_loader
+Search-Analyzer.sources --> Search-Analyzer.sources.video_transcript
+Search-Analyzer.sources --> Search-Analyzer.sources.web_search
+Search-Analyzer.sources.pdf_loader --> Search-Analyzer.sources.retriever
+Search-Analyzer.utils.pdf_utils --> Search-Analyzer.utils.http_utils
+@enduml
