@@ -1,6 +1,6 @@
 #services/text_service.py
 from fastapi.responses import JSONResponse
-from base_manager import BaseAPIManager
+from .base_manager import BaseAPIManager
 from fastapi import Form
 from services.types import DocumentTypeEnum
 

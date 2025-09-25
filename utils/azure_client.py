@@ -1,6 +1,8 @@
 import re, traceback
-from config import AZURE_CFG
+from config import Config
+AZURE_CFG = Config.AZURE_CFG
 from openai import AzureOpenAI
+from fastapi import Form
 
 def _is_azure_configured() -> bool:
     return bool(AZURE_CFG.get("api_key") and AZURE_CFG.get("endpoint") and AZURE_CFG.get("deployment_name"))

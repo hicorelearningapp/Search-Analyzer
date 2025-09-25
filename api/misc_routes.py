@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 from app_state import AppState
+from fastapi import Depends
 
 router = APIRouter()
 
 @router.post("/clear_state")
-async def clear_state_endpoint(app_state: AppState):
+async def clear_state_endpoint(app_state: AppState = Depends(AppState.get_app_state)):
     app_state.state.search_results = []
     app_state.state.selected_indices = []
     app_state.state.synthesis_storage = {}

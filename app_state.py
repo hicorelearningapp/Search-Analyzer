@@ -8,8 +8,17 @@ class SessionState(BaseModel):
     synthesis_storage: Dict[str, str] = {}
 
 class AppState:
-    def __init__(self):
-        self.state = SessionState()
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AppState, cls).__new__(cls)
+            cls._instance.state = SessionState()
+        return cls._instance
+    
+    @classmethod
+    def get_app_state(cls) -> 'AppState':
+        return cls()
     
     @property
     def sessions(self) -> Dict[str, Dict[str, Any]]:

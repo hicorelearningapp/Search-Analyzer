@@ -2,6 +2,7 @@ from typing import List, Dict, Optional
 from openai import AzureOpenAI
 import asyncio
 from app_state import AppState
+from fastapi import Form
 
 class ProposalService:
     @staticmethod

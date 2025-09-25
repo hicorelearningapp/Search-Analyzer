@@ -2,14 +2,13 @@ from fastapi import APIRouter, HTTPException, Form, Request
 from typing import List, Dict, Any, Optional
 import re
 import time
-from ..app_state import AppState
-from ..services.search_service import search_multiple_sources, find_top_researchers, select_papers
-from ..services.summary_service import generate_structured_summaries
-from ..services.proposal_service import generate_proposal
-from ..services.methodology_service import extract_methodology, compare_methodologies
-from ..services.review_service import generate_review_draft
-from ..services.visualization_service import generate_visualization
-from ..services.synthesis_service import generate_synthesis
+from app_state import AppState
+from services.search_service import search_multiple_sources, find_top_researchers, select_papers
+from services.summary_service import generate_structured_summaries
+from services.proposal_service import generate_proposal
+from services.methodology_service import extract_methodology, compare_methodologies
+from services.review_service import generate_review_draft
+from services.visualization_service import generate_visualization
 
 router = APIRouter()
 

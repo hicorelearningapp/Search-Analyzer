@@ -36,16 +36,16 @@ async def summarize_pdf(file: UploadFile, doc_type: DocumentTypeEnum = Form(...)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/youtube")
-async def summarize_youtube(url: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
+async def summarize_youtube(query: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
     try:
-        return await youtube_service.process_youtube(url, doc_type, pages)
+        return await youtube_service.process_youtube(query, doc_type, pages)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/web")
 async def summarize_web(query: str = Form(...), doc_type: DocumentTypeEnum = Form(...), pages: int = Form(2)):
     try:
-        return await web_service.process_web(query, doc_type, pages)
+        return await web_service.process(query, doc_type, pages)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

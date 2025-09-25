@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Optional, List
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 import requests
 from bs4 import BeautifulSoup
 import re

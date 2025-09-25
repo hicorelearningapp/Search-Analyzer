@@ -1,7 +1,7 @@
 # sources/video_transcript.py
 import re
 from datetime import datetime
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 from youtube_transcript_api import YouTubeTranscriptApi
 
 
@@ -28,7 +28,7 @@ class YouTubeSearch:
 
 class YouTubeTranscriptFetcher:
 
-    def get_video_id(url):
+    def get_video_id(self, url: str) -> str:
         """
         Extracts the video ID from a YouTube URL.
         """
@@ -39,9 +39,9 @@ class YouTubeTranscriptFetcher:
         else:
             raise ValueError("Invalid YouTube URL")
 
-    def get_transcript_direct(url):
+    def get_transcript_direct(self, url: str) -> str:
 
-        video_id = get_video_id(url)
+        video_id = self.get_video_id(url)
         try:
             transcript_api = YouTubeTranscriptApi()
             result = transcript_api.fetch(video_id)

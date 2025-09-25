@@ -14,7 +14,7 @@ from docx_generator import SummaryDocxBuilder
 
 class BaseAPIManager:
     def __init__(self):
-        from retriever import VectorRetriever
+        from sources.retriever import VectorRetriever
         from llm_summarizer import LLMSummarizer
         
         self.retriever = VectorRetriever()

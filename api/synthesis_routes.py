@@ -2,8 +2,8 @@ from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 import io
 from typing import Dict, Any
-from ..services.summary_service import SummaryService
-from ..app_state import AppState
+from services.summary_service import SummaryService
+from app_state import AppState
 
 router = APIRouter()
 
