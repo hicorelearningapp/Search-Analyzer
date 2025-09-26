@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Form
-from services.session_service import SessionService
+from services.suggestion_service import suggestion_service
 
 router = APIRouter()
 
 @router.post("/suggest_topics")
 async def suggest_topics(keywords: str = Form(...), limit: int = Form(6), session_id: str = Form(None)):
-    return SessionService.suggest_topics(keywords, limit, session_id)
+    return suggestion_service.generate_topic_suggestions(keywords, limit, session_id)

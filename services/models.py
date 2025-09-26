@@ -51,3 +51,10 @@ class SearchError(BaseModel):
     """Error response model for search operations."""
     error: str
     details: Optional[Dict[str, Any]] = None
+
+class SearchServiceError(Exception):
+    """Custom exception for search service failures."""
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+

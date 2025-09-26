@@ -1,3 +1,4 @@
+# services/search_service.py
 from typing import List, Dict, Any, Optional
 import requests
 from utils.search_utils import (
@@ -6,7 +7,8 @@ from utils.search_utils import (
     openalex_search,
     semantic_scholar_author_search
 )
-from services.base_manager import BaseAPIManager
+from services.general_search_services import BaseAPIManager
+from services.models import SearchServiceError
 
 class SearchService(BaseAPIManager):
     @staticmethod
@@ -17,11 +19,11 @@ class SearchService(BaseAPIManager):
         results = []
         
         if 'semantic' in sources:
-            results.extend(await semantic_scholar_search(query, limit))
+            results.extend(semantic_scholar_search(query, limit))
         if 'arxiv' in sources:
-            results.extend(await arxiv_search(query, limit))
+            results.extend(arxiv_search(query, limit))
         if 'openalex' in sources:
-            results.extend(await openalex_search(query, limit))
+            results.extend(openalex_search(query, limit))
         
         return results
 

@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import (
-    session_routes,
     search_routes,
     proposal_routes,
     methodology_routes,
@@ -11,7 +10,8 @@ from api import (
     synthesis_routes,
     compare_routes,
     misc_routes,
-    search_analyzer_routes
+    search_analyzer_routes,
+    suggestion_routes
 )
 
 app = FastAPI(title="HICORE Research API (Extended)", description="Extended research & document processing API")
@@ -23,7 +23,6 @@ app.add_middleware(
 )
 
 # Include Routers
-app.include_router(session_routes.router)
 app.include_router(search_routes.router)
 app.include_router(proposal_routes.router)
 app.include_router(methodology_routes.router)
@@ -33,6 +32,7 @@ app.include_router(synthesis_routes.router)
 app.include_router(compare_routes.router)
 app.include_router(misc_routes.router)
 app.include_router(search_analyzer_routes.router)
+app.include_router(suggestion_routes.router)
 
 if __name__ == "__main__":
     import uvicorn

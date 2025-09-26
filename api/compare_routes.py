@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/compare_papers")
 async def compare_selected_papers_endpoint(request: Request):
     app_state: AppState = request.app.state.app_state
-    if not app_state.state.selected_indices:
+    if not app_state.selected_indices:
         raise HTTPException(status_code=400, detail="No papers selected")
     try:
         return await ResearcherService.compare_papers(app_state)

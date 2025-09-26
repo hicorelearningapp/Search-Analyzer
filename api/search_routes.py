@@ -3,7 +3,7 @@ from fastapi import APIRouter, Form, HTTPException, Depends
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from services.search_service import SearchService
-from services.models import SearchResponse, SelectPapersRequest, Paper, SelectPapersResponse, SearchError
+from services.models import SearchResponse, SelectPapersRequest, Paper, SelectPapersResponse, SearchServiceError
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ async def project_start(topic: str = Form(...), limit: int = Form(5, ge=1, le=10
             "papers": results[:limit],
             "total_results": len(results)
         }
-    except SearchError as e:
+    except SearchServiceError as e:
         raise HTTPException(
             status_code=400,
             detail={"error": "Search failed", "details": str(e)}
@@ -58,7 +58,7 @@ async def search_papers(
             "papers": results[:limit],
             "total_results": len(results)
         }
-    except SearchError as e:
+    except SearchServiceError as e:
         raise HTTPException(
             status_code=400,
             detail={"error": "Search failed", "details": str(e)}

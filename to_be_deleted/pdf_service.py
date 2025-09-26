@@ -14,22 +14,9 @@ class PDFClass(BaseAPIManager):
         try:
             text = await PDFManager().extract_text(file=file)
             doc_type_str = doc_type.value if hasattr(doc_type, 'value') else doc_type
-            
-            self.retriever.process_text(
-                text,
-                metadata={"source": "pdf", "query": file.filename, "doc_type": doc_type_str}
-            )
-            summary = self.summarizer.summarize_with_structure(
-                self.retriever, text, doc_type_str, pages
-            )
+            self.retriever.process_text(text,metadata={"source": "pdf", "query": file.filename, "doc_type": doc_type_str})
+            summary = self.summarizer.summarize_with_structure(self.retriever, text, doc_type_str, pages)
             filename = self.save_docx(summary, "pdf", doc_type_str)
-            return {
-                "raw_text": text, 
-                "summary": summary, 
-                "download_link": f"/download/{filename}"
-            }
+            return {"raw_text": text, "summary": summary, "download_link": f"/download/{filename}"}
         except Exception as e:
-            return JSONResponse(
-                status_code=500, 
-                content={"error": str(e)}
-            )
+            return JSONResponse(status_code=500, content={"error": str(e)})

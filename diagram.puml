@@ -1,3 +1,0 @@
-@startuml
-WebSearchManager -> WebClass: process
-@enduml
