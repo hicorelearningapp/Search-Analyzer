@@ -21,37 +21,22 @@ from app_state import AppState
 router = APIRouter(prefix="/search-analyzer", tags=["Search Analyzer"])
 
 # Create DocumentTypeEnum for API documentation
-DocumentTypeEnum = Enum(
-    "DocumentTypeEnum",
-    {t.replace(" ", "_"): t for t in document_system.list_document_types()}
-)
+DocumentTypeEnum = Enum("DocumentTypeEnum",{t.replace(" ", "_"): t for t in document_system.list_document_types()})
 
 def get_app_state():
     return AppState()
 
 @router.post("/pdf")
-async def summarize_pdf(
-    file: UploadFile,
-    doc_type: DocumentTypeEnum = Form(...),
-    pages: int = Form(2),
-    session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
-):
+async def summarize_pdf(file: UploadFile,doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
     """Process and summarize a PDF document."""
-    try:
+    try: 
         service = PDFService(app_state=app_state)
         return await service.process_pdf(file, doc_type, pages, session_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/youtube")
-async def summarize_youtube(
-    query: str = Form(...),
-    doc_type: DocumentTypeEnum = Form(...),
-    pages: int = Form(2),
-    session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
-):
+async def summarize_youtube(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
     """Process and summarize a YouTube video."""
     try:
         service = YouTubeService(app_state=app_state)
@@ -60,13 +45,7 @@ async def summarize_youtube(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/web")
-async def summarize_web(
-    query: str = Form(...),
-    doc_type: DocumentTypeEnum = Form(...),
-    pages: int = Form(2),
-    session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
-):
+async def summarize_web(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
     """Process and summarize web content."""
     try:
         service = WebService(app_state=app_state)
@@ -75,13 +54,7 @@ async def summarize_web(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/text")
-async def summarize_text(
-    text: str = Form(...),
-    doc_type: DocumentTypeEnum = Form(...),
-    pages: int = Form(2),
-    session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
-):
+async def summarize_text(text: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
     """Process and summarize plain text."""
     try:
         service = TextService(app_state=app_state)
@@ -90,27 +63,13 @@ async def summarize_text(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/session/{session_id}")
-async def get_session_results(
-    session_id: str,
-    app_state: AppState = Depends(get_app_state)
-):
+async def get_session_results(session_id: str,app_state: AppState = Depends(get_app_state)):
     """Retrieve all search results for a session."""
     try:
         session_data = app_state.get_user_state(session_id)
         if "search_results" not in session_data.synthesis_storage:
-            raise HTTPException(
-                status_code=404,
-                detail="No search results found for this session"
-            )
+            raise HTTPException(status_code=404,detail="No search results found for this session")
             
-        return {
-            "session_id": session_id,
-            "created_at": session_data.synthesis_storage.get("created_at"),
-            "last_activity": session_data.synthesis_storage.get("last_activity"),
-            "results": session_data.synthesis_storage.get("search_results", [])
-        }
+        return {"session_id": session_id,"created_at": session_data.synthesis_storage.get("created_at"),"last_activity": session_data.synthesis_storage.get("last_activity"),"results": session_data.synthesis_storage.get("search_results", [])}
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving session results: {str(e)}"
-        )
+        raise HTTPException(status_code=500,detail=f"Error retrieving session results: {str(e)}")
