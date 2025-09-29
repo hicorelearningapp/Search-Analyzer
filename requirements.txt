@@ -1,7 +1,6 @@
 # Core Dependencies
 fastapi
 uvicorn
-python-dotenv
 pydantic
 
 # Database
@@ -17,7 +16,6 @@ PyPDF2
 python-docx
 beautifulsoup4
 requests
-python-multipart
 
 # Search and Web
 youtube-transcript-api
@@ -38,9 +36,6 @@ pytest-asyncio
 # Utilities
 python-jose[cryptography]
 passlib[bcrypt]
-python-multipart
-
-# CORS
 python-multipart
 
 # Environment
