@@ -46,4 +46,3 @@ python-multipart
 python-dotenv
 
 # Add this line to help with Azure deployment
---no-cache-dir
