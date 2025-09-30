@@ -8,7 +8,6 @@ from utils.search_utils import (
     semantic_scholar_author_search
 )
 from services.general_search_services import BaseAPIManager
-from services.models import SearchServiceError
 
 class SearchService(BaseAPIManager):
     @staticmethod
