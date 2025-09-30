@@ -45,4 +45,7 @@ python-multipart
 # Environment
 python-dotenv
 
+gunicorn
+pandas
+
 
