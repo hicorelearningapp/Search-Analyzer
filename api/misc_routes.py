@@ -4,16 +4,16 @@ Miscellaneous routes
 
 from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Dict, Any
-from app_state import AppState
+from app_state import AppStateManager
 from datetime import datetime
 
 router = APIRouter(prefix="/misc", tags=["Miscellaneous"])
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/clear_state")
-async def clear_state(session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)) -> Dict[str, str]:
+async def clear_state(session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)) -> Dict[str, str]:
 
     try:
         if session_id in app_state.sessions:
@@ -31,7 +31,7 @@ async def clear_state(session_id: str = Header(..., alias="X-Session-Id"),app_st
         raise HTTPException(status_code=500, detail=f"Error clearing state: {str(e)}")
 
 @router.post("/clear_all_sessions")
-async def clear_all_sessions(app_state: AppState = Depends(get_app_state)) -> Dict[str, str]:
+async def clear_all_sessions(app_state: AppStateManager = Depends(get_app_state)) -> Dict[str, str]:
     try:
         app_state.sessions.clear()
         return {"message": "All sessions cleared", "status": "success"}
@@ -40,7 +40,7 @@ async def clear_all_sessions(app_state: AppState = Depends(get_app_state)) -> Di
         raise HTTPException(status_code=500, detail=f"Error clearing all sessions: {str(e)}")
 
 @router.get("/session_info/{session_id}")
-async def get_session_info(session_id: str,app_state: AppState = Depends(get_app_state)) -> Dict[str, Any]:
+async def get_session_info(session_id: str,app_state: AppStateManager = Depends(get_app_state)) -> Dict[str, Any]:
     try:
         if session_id not in app_state.sessions:
             raise HTTPException(status_code=404, detail=f"Session {session_id} not found")

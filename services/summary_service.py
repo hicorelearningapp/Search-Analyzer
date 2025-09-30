@@ -1,14 +1,14 @@
 # services/summary_service.py
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from app_state import AppState
+from app_state import AppStateManager
 from utils.parsing import parse_structured_sections
 from utils.azure_client import call_azure_chat
 
 class SummaryService:
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional app state injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     async def generate_structured_summaries(
         self,

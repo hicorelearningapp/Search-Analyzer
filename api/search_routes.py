@@ -4,6 +4,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from services.search_service import SearchService
 from services.models import SearchResponse, SelectPapersRequest, Paper, SelectPapersResponse, SearchServiceError
+from app_state import AppStateManager
 
 router = APIRouter()
 

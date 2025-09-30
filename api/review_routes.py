@@ -1,16 +1,16 @@
 # api/review_routes.py
 from fastapi import APIRouter, Form, Depends, HTTPException, Header
-from app_state import AppState
+from app_state import AppStateManager
 from services.review_service import ReviewService
 from typing import List
 
 router = APIRouter()
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/review_paper")
-async def review_paper(subtopics: str = Form(""), selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def review_paper(subtopics: str = Form(""), selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
 
     try:
         user_state = app_state.get_user_state(session_id)   

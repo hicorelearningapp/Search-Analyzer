@@ -2,13 +2,13 @@
 from typing import List, Dict, Any, Optional
 from openai import AzureOpenAI
 from utils.azure_client import call_azure_chat
-from app_state import AppState
+from app_state import AppStateManager
 from datetime import datetime
 
 class ReviewService:
 
-    def __init__(self, app_state: Optional[AppState] = None):
-        self.app_state = app_state or AppState()
+    def __init__(self, app_state: Optional[AppStateManager] = None):
+        self.app_state = app_state or AppStateManager()
 
     async def scaffold_review(self,papers: List[Dict[str, Any]],subtopics: Optional[List[str]] = None,session_id: Optional[str] = None,azure_client: Optional[AzureOpenAI] = None) -> Dict[str, Any]:
 

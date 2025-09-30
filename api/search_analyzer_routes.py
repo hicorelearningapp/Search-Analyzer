@@ -14,9 +14,8 @@ sys.path.append(search_analyzer_path)
 from document_system import document_system
 from services.general_search_services import (
     PDFService, YouTubeService, WebService, TextService,
-    pdf_service, youtube_service, web_service, text_service
 )
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter(prefix="/search-analyzer", tags=["Search Analyzer"])
 
@@ -24,10 +23,10 @@ router = APIRouter(prefix="/search-analyzer", tags=["Search Analyzer"])
 DocumentTypeEnum = Enum("DocumentTypeEnum",{t.replace(" ", "_"): t for t in document_system.list_document_types()})
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/pdf")
-async def summarize_pdf(file: UploadFile,doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def summarize_pdf(file: UploadFile,doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: Optional[str] = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     """Process and summarize a PDF document."""
     try: 
         service = PDFService(app_state=app_state)
@@ -36,7 +35,7 @@ async def summarize_pdf(file: UploadFile,doc_type: DocumentTypeEnum = Form(...),
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/youtube")
-async def summarize_youtube(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def summarize_youtube(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: Optional[str] = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     """Process and summarize a YouTube video."""
     try:
         service = YouTubeService(app_state=app_state)
@@ -45,7 +44,7 @@ async def summarize_youtube(query: str = Form(...),doc_type: DocumentTypeEnum = 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/web")
-async def summarize_web(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def summarize_web(query: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: Optional[str] = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     """Process and summarize web content."""
     try:
         service = WebService(app_state=app_state)
@@ -54,7 +53,7 @@ async def summarize_web(query: str = Form(...),doc_type: DocumentTypeEnum = Form
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/text")
-async def summarize_text(text: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def summarize_text(text: str = Form(...),doc_type: DocumentTypeEnum = Form(...),pages: int = Form(2),session_id: Optional[str] = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     """Process and summarize plain text."""
     try:
         service = TextService(app_state=app_state)
@@ -63,7 +62,7 @@ async def summarize_text(text: str = Form(...),doc_type: DocumentTypeEnum = Form
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/session/{session_id}")
-async def get_session_results(session_id: str,app_state: AppState = Depends(get_app_state)):
+async def get_session_results(session_id: str,app_state: AppStateManager = Depends(get_app_state)):
     """Retrieve all search results for a session."""
     try:
         session_data = app_state.get_user_state(session_id)

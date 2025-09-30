@@ -1,12 +1,11 @@
 from typing import Dict, Any, Optional
 from datetime import datetime
-from app_state import AppState
-import re
+from app_state import AppStateManager
 
 class SessionService:
 
-    def __init__(self, app_state: Optional[AppState] = None):
-        self.app_state = app_state or AppState()
+    def __init__(self, app_state: Optional[AppStateManager] = None):
+        self.app_state = app_state or AppStateManager()
 
     def create_session(self, intent: str, user_id: str = "default") -> Dict[str, Any]:
         session_id = f"{user_id}_{int(datetime.now().timestamp())}"

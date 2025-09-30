@@ -3,15 +3,15 @@ from fastapi import APIRouter, Form, HTTPException, Header, Depends
 from fastapi.responses import HTMLResponse, Response
 from typing import List, Optional
 from services.visualization_service import VisualizationService
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter()
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/visualize_map")
-async def visualize_map(paper_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def visualize_map(paper_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         indices = []
         if paper_indices:
@@ -28,7 +28,7 @@ async def visualize_map(paper_indices: str = Form(""),session_id: str = Header(.
         raise HTTPException(status_code=500,detail=f"Error generating visualization: {str(e)}")
 
 @router.post("/generate_flowchart")
-async def generate_flowchart(methods_text: str = Form(...),format: str = Form("png"),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def generate_flowchart(methods_text: str = Form(...),format: str = Form("png"),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         service = VisualizationService(app_state=app_state)
         result = await service.generate_methodology_flowchart(methods_text=methods_text,session_id=session_id,format=format)
@@ -41,7 +41,7 @@ async def generate_flowchart(methods_text: str = Form(...),format: str = Form("p
         raise HTTPException(status_code=500,detail=f"Error generating flowchart: {str(e)}")
 
 @router.get("/visualization/{session_id}")
-async def get_visualization(session_id: str,app_state: AppState = Depends(get_app_state)):
+async def get_visualization(session_id: str,app_state: AppStateManager = Depends(get_app_state)):
     try:
         session_data = app_state.get_user_state(session_id)
         

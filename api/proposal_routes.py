@@ -2,12 +2,12 @@
 from fastapi import APIRouter, Form, HTTPException, Header, Depends
 from typing import List, Optional
 from services.proposal_service import ProposalService
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter()
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/proposal_writer")
 async def proposal_writer(
@@ -15,7 +15,7 @@ async def proposal_writer(
     chosen_subtopics: str = Form("", description="Comma-separated list of subtopics"),
     expected_methods: str = Form("", description="Comma-separated list of expected methods"),
     session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
+    app_state: AppStateManager = Depends(get_app_state)
 ):
     try:
         user_state = app_state.get_user_state(session_id)
@@ -44,7 +44,7 @@ async def proposal_writer(
 @router.get("/proposal/{session_id}")
 async def get_proposal(
     session_id: str,
-    app_state: AppState = Depends(get_app_state)
+    app_state: AppStateManager = Depends(get_app_state)
 ):
     user_state = app_state.get_user_state(session_id)
     if "latest_proposal" not in user_state.synthesis_storage:

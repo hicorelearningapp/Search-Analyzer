@@ -2,15 +2,15 @@
 from fastapi import APIRouter, Form, HTTPException, Header, Depends
 from typing import List, Optional
 from services.methodology_service import MethodologyService
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter()
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/methodology_search")
-async def methodology_search(paper_indices: str = Form(...),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def methodology_search(paper_indices: str = Form(...),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         indices = [int(x.strip()) for x in paper_indices.split(",") if x.strip().isdigit()]
         if not indices:
@@ -25,7 +25,7 @@ async def methodology_search(paper_indices: str = Form(...),session_id: str = He
         raise HTTPException(status_code=500,detail=f"Error extracting methodology: {str(e)}")
 
 @router.post("/compare_methodologies")
-async def compare_methodologies(paper_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def compare_methodologies(paper_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         indices = None
         if paper_indices:
@@ -44,7 +44,7 @@ async def compare_methodologies(paper_indices: str = Form(""),session_id: str = 
         raise HTTPException(status_code=500,detail=f"Error comparing methodologies: {str(e)}")
 
 @router.get("/methodology/{session_id}")
-async def get_methodology_analysis(session_id: str,app_state: AppState = Depends(get_app_state)):
+async def get_methodology_analysis(session_id: str,app_state: AppStateManager = Depends(get_app_state)):
     session_data = app_state.get_user_state(session_id)
     if "latest_methodology" in session_data.synthesis_storage:
         return {"type": "methodology_analysis","data": session_data.synthesis_storage["latest_methodology"]}

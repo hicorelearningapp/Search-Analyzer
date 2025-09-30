@@ -5,12 +5,7 @@ from datetime import datetime
 import time
 from typing import List, Dict, Any, Optional
 
-from services.proposal_service import generate_proposal
-from services.methodology_service import extract_methodology, compare_methodologies
-from services.review_service import generate_review_draft
-from services.visualization_service import generate_visualization
 from app_state import AppState, SessionState
-from services.search_service import SearchService
 
 router = APIRouter()
 

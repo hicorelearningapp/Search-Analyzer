@@ -4,15 +4,15 @@ from typing import List, Optional
 import io
 from fastapi.responses import StreamingResponse
 from services.summary_service import SummaryService
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter()
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.post("/generate_structured_summaries")
-async def generate_structured_summaries_endpoint(selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def generate_structured_summaries_endpoint(selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         indices = []
         if selected_indices:
@@ -27,7 +27,7 @@ async def generate_structured_summaries_endpoint(selected_indices: str = Form(""
         raise HTTPException(status_code=500,detail=f"Error generating structured summaries: {str(e)}")
 
 @router.post("/generate_overall_synthesis")
-async def generate_overall_synthesis(selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)):
+async def generate_overall_synthesis(selected_indices: str = Form(""),session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)):
     try:
         indices = []
         if selected_indices:
@@ -42,7 +42,7 @@ async def generate_overall_synthesis(selected_indices: str = Form(""),session_id
         raise HTTPException(status_code=500,detail=f"Error generating synthesis: {str(e)}")
 
 @router.get("/synthesis/{session_id}")
-async def get_synthesis(session_id: str,app_state: AppState = Depends(get_app_state)):
+async def get_synthesis(session_id: str,app_state: AppStateManager = Depends(get_app_state)):
     try:
         session_data = app_state.get_user_state(session_id)
         
@@ -69,7 +69,7 @@ async def get_synthesis(session_id: str,app_state: AppState = Depends(get_app_st
         )
 
 @router.get("/download_synthesis/{session_id}")
-async def download_synthesis(session_id: str,app_state: AppState = Depends(get_app_state)):
+async def download_synthesis(session_id: str,app_state: AppStateManager = Depends(get_app_state)):
     try:
         session_data = app_state.get_user_state(session_id)
         

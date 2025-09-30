@@ -2,12 +2,12 @@
 from typing import List, Dict, Optional
 import re
 from datetime import datetime
-from app_state import AppState
+from app_state import AppStateManager
 
 class SuggestionService:    
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional session service injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     def generate_topic_suggestions(self, keywords: str, limit: int = 6, session_id: Optional[str] = None) -> Dict[str, any]:
         if not session_id:

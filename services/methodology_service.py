@@ -14,12 +14,12 @@ except ImportError:
 
 from utils.azure_client import call_azure_chat
 from utils.pdf_utils import download_pdf_to_text
-from app_state import AppState
+from app_state import AppStateManager
 
 class MethodologyService:
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional app state injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     async def extract_methodology_snippets(
         self, 

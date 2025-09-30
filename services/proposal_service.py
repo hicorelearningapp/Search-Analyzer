@@ -3,13 +3,13 @@ from typing import List, Dict, Optional
 from openai import AzureOpenAI
 from datetime import datetime
 import asyncio
-from app_state import AppState
+from app_state import AppStateManager
 from utils.azure_client import call_azure_chat, _is_azure_configured
 
 class ProposalService:
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional app state injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     async def proposal_writer(
         self,

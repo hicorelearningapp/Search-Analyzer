@@ -15,7 +15,7 @@ from sources.video_transcript import YouTubeTranscriptFetcher, YouTubeTranscript
 from sources.web_search import WebSearchManager
 from sources.pdf_loader import PDFManager
 from llm_summarizer import LLMSummarizer
-from app_state import AppState
+from app_state import AppStateManager
 
 # Document Type Enum
 DocumentTypeEnum = Enum(
@@ -37,11 +37,11 @@ def get_doc_type_str(doc_type) -> str:
 
 class BaseAPIManager:
     """Base class for all document processing services."""
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         self.retriever = VectorRetriever()
         self.summarizer = LLMSummarizer()
         self.document_types = DocumentTypeEnum
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     def _init_session(self, session_id: Optional[str] = None) -> str:
         """Initialize or retrieve session."""
@@ -159,7 +159,7 @@ class WebService(BaseAPIManager):
         self,
         query: str,
         doc_type: DocumentTypeEnum = Form(...),
-        pages: int = 2,
+        pages: int = Form(2),
         session_id: Optional[str] = None
     ) -> Dict[str, Any]:
         try:

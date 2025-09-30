@@ -2,7 +2,7 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from datetime import datetime
-from app_state import AppState, SessionState
+from app_state import AppStateManager, SessionState
 from fastapi import HTTPException
 
 class ComparisonResult(BaseModel):
@@ -13,9 +13,9 @@ class ComparisonResult(BaseModel):
     timestamp: str = datetime.now().isoformat()
 
 class ResearcherService:
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional app state injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     async def compare_selected_papers(
         self,

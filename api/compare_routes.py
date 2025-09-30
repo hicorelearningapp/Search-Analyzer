@@ -2,17 +2,17 @@
 from fastapi import APIRouter, Request, HTTPException, Depends, Header
 from typing import List, Dict, Any
 from services.researcher_service import ResearcherService
-from app_state import AppState
+from app_state import AppStateManager
 
 router = APIRouter(prefix="/compare", tags=["Comparison"])
 
 def get_app_state():
-    return AppState()
+    return AppStateManager()
 
 @router.get("/papers")
 async def compare_papers(
     session_id: str = Header(..., alias="X-Session-Id"),
-    app_state: AppState = Depends(get_app_state)
+    app_state: AppStateManager = Depends(get_app_state)
 ) -> Dict[str, Any]:
     try:
         # Get the session data
@@ -41,7 +41,7 @@ async def compare_papers(
         raise HTTPException(status_code=500,detail=f"Error comparing papers: {str(e)}")
 
 @router.get("/methodologies")
-async def compare_methodologies(session_id: str = Header(..., alias="X-Session-Id"),app_state: AppState = Depends(get_app_state)) -> Dict[str, Any]:
+async def compare_methodologies(session_id: str = Header(..., alias="X-Session-Id"),app_state: AppStateManager = Depends(get_app_state)) -> Dict[str, Any]:
     try:
         session_data = app_state.get_user_state(session_id)
         

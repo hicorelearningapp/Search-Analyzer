@@ -3,14 +3,14 @@ from typing import List, Dict, Any, Optional
 import networkx as nx
 from pyvis.network import Network
 from datetime import datetime
-from app_state import AppState
+from app_state import AppStateManager
 import tempfile
 import os
 
 class VisualizationService:
-    def __init__(self, app_state: Optional[AppState] = None):
+    def __init__(self, app_state: Optional[AppStateManager] = None):
         """Initialize with optional app state injection."""
-        self.app_state = app_state or AppState()
+        self.app_state = app_state or AppStateManager()
 
     async def create_visual_map(
         self,
