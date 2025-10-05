@@ -21,22 +21,7 @@ class MethodologyService:
         """Initialize with optional app state injection."""
         self.app_state = app_state or AppStateManager()
 
-    async def extract_methodology_snippets(
-        self, 
-        indices: Optional[List[int]] = None,
-        session_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Extract methodology snippets from selected papers.
-        
-        Args:
-            indices: List of paper indices to process
-            session_id: Optional session ID for tracking
-            
-        Returns:
-            Dictionary containing methodology snippets and analysis
-        """
-        # Initialize session if needed
+    async def extract_methodology_snippets(self, indices: Optional[List[int]] = None,session_id: Optional[str] = None) -> Dict[str, Any]:
         if session_id:
             session_data = self.app_state.get_user_state(session_id)
             if not session_data:
@@ -86,22 +71,8 @@ class MethodologyService:
         
         return result
 
-    async def compare_methodologies(
-        self,
-        paper_indices: Optional[List[int]] = None,
-        session_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Compare methodologies across multiple papers.
+    async def compare_methodologies(self,paper_indices: Optional[List[int]] = None,session_id: Optional[str] = None) -> Dict[str, Any]:
         
-        Args:
-            paper_indices: List of paper indices to compare
-            session_id: Optional session ID for tracking
-            
-        Returns:
-            Dictionary containing methodology comparison
-        """
-        # Initialize session if needed
         if session_id:
             session_data = self.app_state.get_user_state(session_id)
             if not session_data:
@@ -138,11 +109,7 @@ class MethodologyService:
 
         # Store results in session
         result = {
-            "session_id": session_id,
-            "comparison": comparison_analysis,
-            "papers_compared": [c["title"] for c in comparisons],
-            "timestamp": datetime.now().isoformat()
-        }
+            "session_id": session_id,"comparison": comparison_analysis,"papers_compared": [c["title"] for c in comparisons],"timestamp": datetime.now().isoformat()}
         
         session_data.synthesis_storage["latest_comparison"] = result
         session_data.synthesis_storage["last_activity"] = datetime.now().isoformat()
@@ -150,13 +117,11 @@ class MethodologyService:
         return result
 
     async def _get_paper_text(self, paper: Dict[str, Any]) -> str:
-        """Extract text from paper, either from PDF or abstract."""
         if paper.get("pdf_url"):
             return await download_pdf_to_text(paper["pdf_url"])
         return paper.get("abstract", "")
 
     def _extract_methodology_section(self, text: str) -> str:
-        """Extract methodology section from text."""
         if not text:
             return ""
         match = re.search(
@@ -167,7 +132,6 @@ class MethodologyService:
         return match.group(0).strip() if match else text[:800]
 
     def _generate_flowchart(self, steps: List[str]) -> Optional[str]:
-        """Generate a flowchart from methodology steps."""
         if not GRAPHVIZ_AVAILABLE or not steps:
             return None
             
@@ -184,10 +148,7 @@ class MethodologyService:
             return None
 
     async def _analyze_methodologies(self, comparisons: List[Dict[str, str]]) -> str:
-        """Generate analysis of methodology comparisons using LLM."""
-        comparison_text = "\n\n".join(
-            f"Paper: {c['title']}\nMethodology:\n{c['methodology']}"
-            for c in comparisons
+        comparison_text = "\n\n".join(f"Paper: {c['title']}\nMethodology:\n{c['methodology']}"for c in comparisons
         )
         
         prompt = (

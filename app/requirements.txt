@@ -1,0 +1,52 @@
+# Core Dependencies
+fastapi
+uvicorn
+python-dotenv
+pydantic
+
+# Database
+sqlalchemy
+alembic
+
+# Async
+httpx
+aiofiles
+
+# Document Processing
+PyPDF2
+python-docx
+beautifulsoup4
+requests
+python-multipart
+
+# Search and Web
+youtube-transcript-api
+duckduckgo-search
+
+# AI/ML (for Search-Analyzer)
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.0.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+transformers==4.30.2
+sentence-transformers==2.2.2
+openai
+langchain-community
+faiss-cpu
+numpy
+
+# Development and Testing
+pytest
+pytest-asyncio
+
+# Utilities
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Environment
+python-dotenv
+
+gunicorn
+pandas
+PyQt5
+PyInstaller
+
