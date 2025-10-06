@@ -1,10 +1,11 @@
 # api/suggestion_routes.py
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
-from services.suggestion_service import suggestion_service
+from services.suggestion_service import SuggestionService
 from app_state import SessionStateManager
 
 router = APIRouter(prefix="/suggestion", tags=["Suggestion"])
+suggestion_service = SuggestionService()
 
 @router.post("/suggest_topics")
 async def suggest_topics(request: Request,keywords: str = Form(..., description="Comma-separated list of keywords"),limit: int = Form(6, ge=1, le=20, description="Maximum number of suggestions to return")):

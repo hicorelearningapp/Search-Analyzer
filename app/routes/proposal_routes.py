@@ -1,7 +1,7 @@
 # api/proposal_routes.py
 from fastapi import APIRouter, Form, HTTPException, Request
 from services.proposal_service import ProposalService
-from app_state import session_manager  # ✅ Session tracking
+from app_state import SessionStateManager   # ✅ Session tracking
 from typing import List
 
 router = APIRouter()
@@ -28,9 +28,9 @@ async def proposal_writer(
         # ✅ Identify or create session
         session_id = request.headers.get("X-Session-ID")
         if not session_id:
-            session_id = session_manager.create_session()
+            session_id = SessionStateManager.get_instance().create_session()
 
-        session_state = session_manager.get_session(session_id)
+        session_state = SessionStateManager.get_instance().get_session(session_id)
 
         # ✅ Parse subtopics and methods (default fallback optional)
         subs = [s.strip() for s in chosen_subtopics.split(",") if s.strip()] or ["Introduction", "Methodology", "Expected Outcomes"]
@@ -45,14 +45,14 @@ async def proposal_writer(
         )
 
         # ✅ Update session state
-        session_state.last_activity = session_manager.timestamp()
+        session_state.last_activity = SessionStateManager.get_instance().timestamp()
         session_state.proposal = {
             "title": title,
             "subtopics": subs,
             "methods": methods,
             "proposal_text": proposal
         }
-        session_manager.update_session(session_id, session_state)
+        SessionStateManager.get_instance().update_session(session_id, session_state)
 
         # ✅ Return result
         return {
@@ -81,7 +81,7 @@ async def get_saved_proposal(request: Request):
     if not session_id:
         raise HTTPException(status_code=400, detail="Missing session ID")
 
-    session_state = session_manager.get_session(session_id)
+    session_state = SessionStateManager.get_instance().get_session(session_id)
     if not hasattr(session_state, "proposal") or not session_state.proposal:
         raise HTTPException(status_code=404, detail="No saved proposal found for this session")
 

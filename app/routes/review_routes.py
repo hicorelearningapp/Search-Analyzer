@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Form, HTTPException, Request
 from typing import List
 from services.review_service import ReviewService
-from app_state import session_manager  # Session manager for per-user session tracking
+from app_state import SessionStateManager   # Session manager for per-user session tracking
 
 router = APIRouter()
 
@@ -28,9 +28,9 @@ async def review_paper(
         # ✅ Identify or create session
         session_id = request.headers.get("X-Session-ID")
         if not session_id:
-            session_id = session_manager.create_session()
+            session_id = SessionStateManager.get_instance().create_session()
         
-        session_state = session_manager.get_session(session_id)
+        session_state = SessionStateManager.get_instance().get_session(session_id)
 
         # ✅ Parse subtopics or use default ones
         subs = [s.strip() for s in subtopics.split(",") if s.strip()] or ["Background", "Methods", "Results"]
@@ -50,13 +50,13 @@ async def review_paper(
         review = await ReviewService().scaffold_review(selected_papers, subs)
 
         # ✅ Update session data
-        session_state.last_activity = session_manager.timestamp()
+        session_state.last_activity = SessionStateManager.get_instance().timestamp()
         session_state.review = {
             "subtopics": subs,
             "selected_indices": idxs,
             "review_text": review
         }
-        session_manager.update_session(session_id, session_state)
+        SessionStateManager.get_instance().update_session(session_id, session_state)
 
         # ✅ Return review with session tracking info
         return {

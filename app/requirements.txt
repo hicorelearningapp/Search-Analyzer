@@ -49,4 +49,7 @@ gunicorn
 pandas
 PyQt5
 PyInstaller
+pyvis
 
+# Visualization
+pyvis
